@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/AckerApple/ack-node#readme",
   "dependencies": {
-    "ack-x": "https://github.com/AckerApple/ack-x.git",
+    "ack-x": "^1.2.5",
     "body-parser": "^1.15.1",
     "compression": "^1.6.2",
     "connect-timeout": "^1.7.0",
