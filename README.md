@@ -9,26 +9,26 @@ $ npm install ack-node --save
 
 ## Usage
 ```
-  var ack = require('ack-node')
+var ack = require('ack-node')
 ```
 
 ### ack.promise - executed already running promise
 ```
-  ack.promise('val1','val2').then((v1,v2)=>console.log(v1,v2))
+ack.promise('val1','val2').then((v1,v2)=>console.log(v1,v2))
 ```
 
 ### ack.Promise - Promise
 ```
-  ack.Promise((res,rej)=>{}).then()
+ack.Promise((res,rej)=>{}).then()
 ```
 
 ### ack.ip - Internet Protocol address functionality
 ```
-  /** matches 192.168 and other internal network ips */
-  ack.ip('192.168.0.0').isPrivate()
+/** matches 192.168 and other internal network ips */
+ack.ip('192.168.0.0').isPrivate()
 
-  /** matches host machine ips */
-  ack.ip('127.0.0.0').isHost()
+/** matches host machine ips */
+ack.ip('127.0.0.0').isHost()
 ```
 
 ### ack.file - system file functionality
