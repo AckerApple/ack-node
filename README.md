@@ -1,7 +1,37 @@
 # ack-node
 Common server-side functionality, wrapped in one package, the Acker way
 
-## ack.path - system file functionality
+
+## Install
+```
+$ npm install ack-os-services --save
+```
+
+## Usage
+```
+  var ack = require('ack-node')
+```
+
+### ack.promise - executed already running promise
+```
+  ack.promise('val1','val2').then((v1,v2)=>console.log(v1,v2))
+```
+
+### ack.Promise - Promise
+```
+  ack.Promise((res,rej)=>{}).then()
+```
+
+### ack.ip - Internet Protocol address functionality
+```
+  /** matches 192.168 and other internal network ips */
+  ack.ip('192.168.0.0').isPrivate
+
+  /** matches host machine ips */
+  ack.ip('127.0.0.0').isHost
+```
+
+### ack.file - system file functionality
 ```
   ack.file(__dirname).delete().then()
   ack.file(__dirname).getMimeType()//Ex: application/javascript
@@ -10,7 +40,7 @@ Common server-side functionality, wrapped in one package, the Acker way
   ack.file(__dirname).append(string).then()
 ```
 
-## ack.path - system directory functionality
+### ack.path - system directory functionality
 ```
   //created directory if not existant
   ack.path(__dirname).paramDir().then()
@@ -36,21 +66,21 @@ Common server-side functionality, wrapped in one package, the Acker way
   ack.path(__dirname).sync().exists()//NONASYNC
 ```
 
-## ack.jwt - json web tokens
+### ack.jwt - json web tokens
 ```
   var payload = {some:'data',hello:'world'}
   var signed = ack.jwt(payload,'your-secret-key').sign()
   ack.jwt(signed,'your-secret-key').verify().then(payload)
 ```
 
-## ack.req - outbound http/https requests
+### ack.req - outbound http/https requests
 ```
   ack.req(url).send()
   ack.req(url).put(data)
   ack.req(url).delete()
 ```
 
-## ack.router - middleware
+### ack.router - middleware
 ```
   /** returns middleware that sets cache-control header for every request */
   ack.router().cacheFor(seconds)
@@ -156,16 +186,3 @@ Common server-side functionality, wrapped in one package, the Acker way
   /** returns middleware that only allows local network requests */
   ack.router().localNetworkOnly(message)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-

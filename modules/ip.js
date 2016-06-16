@@ -4,6 +4,7 @@ var IP = function(ip){
 	this.ip = ip;return this
 }
 
+/** matches 192.168 and other internal network ips */
 IP.prototype.isPrivate = function(){
   return this.ip.match(/^10\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/) != null ||
   this.ip.match(/^192\.168\.([0-9]{1,3})\.([0-9]{1,3})/) != null ||
@@ -12,6 +13,7 @@ IP.prototype.isPrivate = function(){
   this.isHost(this.ip);
 }
 
+/** matches host machine ips */
 IP.prototype.isHost = function(){
   return this.ip.match(/^(::ffff:)?127\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/) != null ||
   this.ip.match(/^localhost/) != null ||
