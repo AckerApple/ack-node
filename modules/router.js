@@ -13,6 +13,7 @@ var ack = require('../index.js'),
 
 var isProNode = process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase()==='PRODUCTION'
 
+/** returns middleware that sets cache-control header for every request */
 module.exports.cacheFor = function(seconds){
 	return function(req, res, next) {
 		res.setHeader('Cache-Control','public, max-age='+seconds)
@@ -20,6 +21,7 @@ module.exports.cacheFor = function(seconds){
 	}
 }
 
+/** returns middleware that throws 404 file not found errors */
 module.exports.notFound = function(){
 	return function(req, res, next) {
 		var reqres = ack.reqres(req,res)
@@ -34,26 +36,31 @@ module.exports.notFound = function(){
 	}
 }
 
+/** returns middleware that forces requests to timeout. Uses npm connect-timeout */
 module.exports.timeout = function(ms, options){
 	return connectTimeout(ms, options)
 }
 
-/** GZIP requests. See npm compression */
+/** returns middleware that GZIP requests. See npm compression */
 module.exports.compress = function(options){
 	return compression(options)
 }
 
-/** options{origin:'url-string'}. No options means allow all. See package cors */
+/** returns middleware for cross orgin services
+	@options{origin:'url-string'}. No options means allow all. See package cors
+*/
 module.exports.cors = function(options){
 	return cors(options)
 }
 
+/** return middleware that pushes requests to a new url */
 module.exports.relocate = function(url){
 	return function(req, res, next){
   	ack.reqres(req, res).relocate(url)
 	}
 }
 
+/** returns middleware that 404s requests matching typical fav.ico files */
 module.exports.ignoreFavors = function(){
 	return function(req, res, next) {
     if(/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)){
@@ -63,86 +70,9 @@ module.exports.ignoreFavors = function(){
     }
   }
 }
-
 module.exports.ignoreFavIcon = module.exports.ignoreFavors
-module.exports.htmlCloseError = htmlCloseError
 
-/**
-	@options {debug:true/false, debugLocalNetwork:true}
-*/
-function htmlCloseError(options){
-	options = options || {}
-	options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
-	return function(err, req, res, next){
-		var msg = err.message || err.code
-		res.statusCode = err.status || err.statusCode || 500
-		res.statusMessage = msg
-		res.setHeader('Content-Type','text/html')
-		res.setHeader('message', msg)
-		var output = '<h3>'+msg+'</h3>'//message meat
-    var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
-
-		if(isDebug){
-			var dump = {Error:err}
-			var jErr = ack.error(err)
-			if(err.stack){
-				output += jErr.getFirstTrace()
-				dump.stack = jErr.getStackArray()
-			}
-		}else{
-			var dump = err
-		}
-
-		output += ack(dump).dump('html')
-		res.end(output)
-	}
-}
-
-/**
-	@options {debug:true/false, debugLocalNetwork:true}
-*/
-function jsonCloseError(options){
-	options = options || {}
-	options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
-	return function(err, req, res, next){
-	  try{
-			var msg = err.message || err.code
-			res.statusCode = err.status || err.statusCode || 500
-			res.statusMessage = msg
-			res.setHeader('message',msg)
-
-	    var rtn = {
-	      error: {
-	        message: msg,
-	        code: res.statusCode,
-					"debug": {
-						"stack": err.stack
-					}
-	      }
-	    }
-
-	    var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
-	    if(isDebug){
-	      rtn.error.stack = err.stack//debug requests will get stack traces
-	    }
-
-	    res.end( JSON.stringify(rtn) );
-	  }catch(e){
-	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
-	    console.error(e)
-
-	    if(next){
-	      next(err)
-	    }else{
-	      throw err
-	    }
-	  }
-	}
-}
-module.exports.jsonCloseError = jsonCloseError
-
-
-/** error router with crucial details needed during development  */
+/** returns middleware that closes errors with crucial details needed during development  */
 module.exports.closeDevErrors = function(){
 	return function(err, req, res, next){
 		var isHtml = ack.reqres(req,res).isHtml()
@@ -155,7 +85,7 @@ module.exports.closeDevErrors = function(){
 	}
 }
 
-/** conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown */
+/** returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown */
 module.exports.closeProductionErrors = function(){
 	return function processError(err, req, res, next){
 		try{
@@ -179,6 +109,7 @@ module.exports.closeProductionErrors = function(){
 	}
 }
 
+/** returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown */
 module.exports.consoleNonProductionErrors = function(options){
 	if(isProNode){
 		return function(req,res,next){
@@ -196,7 +127,7 @@ module.exports.consoleNonProductionErrors = function(options){
 	}
 }
 
-/** upgrades a url variable into an Authorization header */
+/** returns middleware that upgrades a url variable into an Authorization header */
 module.exports.urlVarAsAuthHeader = function(varName){
 	return function(req, res, next){
 		try{
@@ -212,7 +143,7 @@ module.exports.urlVarAsAuthHeader = function(varName){
 	}
 }
 
-/** upgrades a cookie variable into an Authorization header */
+/** returns middleware that upgrades a cookie variable into an Authorization header */
 module.exports.cookieAsAuthHeader = function(varName){
 	return function(req, res, next){
 		try{
@@ -228,7 +159,7 @@ module.exports.cookieAsAuthHeader = function(varName){
 	}
 }
 
-/**
+/** returns middleware that handles the processing of JWT
 	@options - {
 		requestKeyName: 'auth'//where parsed data will live (aka as requestProperty)
 	}
@@ -262,7 +193,7 @@ module.exports.jwt = function(secret,options){
 	}
 }
 
-/**
+/** returns middleware that makes server logging colorful and useful
 	request-end result logging. see npm morgan
 	default dev format: 'dev' aka ':method :url :status :res[content-length] - :response-time ms'
 	default pro format: ':http-version/:method :url-short :colored-status :res[content-length] - :response-time ms :remote-addr :remote-user'
@@ -279,7 +210,7 @@ module.exports.logging = function(format,options){
 	return morgan(format,options)
 }
 
-/** creates req.files array
+/** returns middleware that uploads files. Creates req.files array
 	@options - see function paramUploadOptions
 */
 module.exports.uploadByName = function(name, options){
@@ -287,12 +218,12 @@ module.exports.uploadByName = function(name, options){
 	return multer(options).array(name)
 }
 
-/** throws 405 errors on request */
+/** returns middleware that throws 405 errors on request */
 module.exports.methodNotAllowed = function(message){
 	return this.throw( ack.error().types.methodNotAllowed(message) )
 }
 
-/** throws 400 errors on request */
+/** returns middleware that throws 400 errors on request */
 module.exports.throw = function(ErrorOrMessage){
 	if(ErrorOrMessage){
 		if(ErrorOrMessage.constructor==String){
@@ -311,7 +242,7 @@ module.exports.throw = function(ErrorOrMessage){
 	}
 }
 
-/**  */
+/** returns middleware that parses request bodies */
 module.exports.parseBody = function(options){
 	options = options || {}
 	return function(req,res,next){
@@ -335,8 +266,7 @@ module.exports.parseBody = function(options){
 	}
 }
 
-/**
-	creates request.body which contains all form post fields
+/** returns middleware that parse multi-part requests. Creates request.body which contains all form post fields
 	NOTE: Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
 */
 module.exports.parseMultipartFields = function(){
@@ -359,7 +289,7 @@ module.exports.parseMultipartFields = function(){
 	}
 }
 
-/** creates req[name] file
+/** returns middleware that uploads only one file. Creates req[name] file
 	@options - see function paramUploadOptions
 	NOTES:
 		- Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
@@ -370,7 +300,7 @@ module.exports.uploadOneByName = function(name, options){
 	return multer(options).single(name)
 }
 
-/** creates req[name] array
+/** returns middleware that uploads an array of files. Creates req[name] array
 	@options - see function paramUploadOptions
 	NOTES:
 	- Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
@@ -381,6 +311,7 @@ module.exports.uploadArrayByName = function(name, options){
 	return multer(options).array(name)
 }
 
+/** returns middleware that only allows local network requests */
 module.exports.localNetworkOnly = function(message){
 	var LocalNetworkRequired = new ack.error().types.LocalNetworkRequired
 	return function(req,res,next){
@@ -394,23 +325,22 @@ module.exports.localNetworkOnly = function(message){
 	}
 }
 
-/** for more see npm module
-	@options {
-		storage:multer.memoryStorage()
-		putSingleFilesInArray:true
-	}
-*/
+//MODULES AS INLINE FUNCTIONS
+module.exports.htmlCloseError = htmlCloseError
+module.exports.jsonCloseError = jsonCloseError
+
+
+
+
+
+
+
+
 function paramUploadOptions(options){
 	options = options || {}
 	options.storage = options.storage || multer.memoryStorage()
 	options.putSingleFilesInArray = options.putSingleFilesInArray===null ? true : options.putSingleFilesInArray
 }
-
-
-
-
-
-
 
 
 morgan.token('colored-method',function(req,res){
@@ -475,3 +405,77 @@ morgan.token('colored-status',function(req,res){
 
 	return status
 })
+
+
+/** Returns universal error handler middleware
+	@options {debug:true/false, debugLocalNetwork:true}
+*/
+function htmlCloseError(options){
+	options = options || {}
+	options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
+	return function(err, req, res, next){
+		var msg = err.message || err.code
+		res.statusCode = err.status || err.statusCode || 500
+		res.statusMessage = msg
+		res.setHeader('Content-Type','text/html')
+		res.setHeader('message', msg)
+		var output = '<h3>'+msg+'</h3>'//message meat
+    var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
+
+		if(isDebug){
+			var dump = {Error:err}
+			var jErr = ack.error(err)
+			if(err.stack){
+				output += jErr.getFirstTrace()
+				dump.stack = jErr.getStackArray()
+			}
+		}else{
+			var dump = err
+		}
+
+		output += ack(dump).dump('html')
+		res.end(output)
+	}
+}
+
+/** returns middleware that handles errors with JSON style details
+	@options {debug:true/false, debugLocalNetwork:true}
+*/
+function jsonCloseError(options){
+	options = options || {}
+	options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
+	return function(err, req, res, next){
+	  try{
+			var msg = err.message || err.code
+			res.statusCode = err.status || err.statusCode || 500
+			res.statusMessage = msg
+			res.setHeader('message',msg)
+
+	    var rtn = {
+	      error: {
+	        message: msg,
+	        code: res.statusCode,
+					"debug": {
+						"stack": err.stack
+					}
+	      }
+	    }
+
+	    var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
+	    if(isDebug){
+	      rtn.error.stack = err.stack//debug requests will get stack traces
+	    }
+
+	    res.end( JSON.stringify(rtn) );
+	  }catch(e){
+	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
+	    console.error(e)
+
+	    if(next){
+	      next(err)
+	    }else{
+	      throw err
+	    }
+	  }
+	}
+}

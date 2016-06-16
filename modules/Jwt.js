@@ -14,11 +14,7 @@ var Jwt = function Jwt($scope){
 //encrypts data into token
 Jwt.prototype.sign = function(){
 	this.data.options = this.data.options || {}
-/*
-	if(!this.data.options.expiresInMinutes){
-		this.data.options.expiresInMinutes = 240//4 hours
-	}
-*/
+
 	if(!this.data.options.expiresIn){
 		this.data.options.expiresIn = '240m'//4 hours
 	}
