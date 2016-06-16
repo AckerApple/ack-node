@@ -4,7 +4,7 @@ Common server-side functionality, wrapped in one package, the Acker way
 
 ## Install
 ```
-$ npm install ack-os-services --save
+$ npm install ack-node --save
 ```
 
 ## Usage
