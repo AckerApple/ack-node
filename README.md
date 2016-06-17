@@ -76,13 +76,21 @@ ack.jwt(signed,'your-secret-key').verify().then(payload)
 
 ### ack.req - outbound http/https requests
 ```
-ack.req(url).send()
-ack.req(url).put(data)
-ack.req(url).delete()
+ack.req(url).send().then(body,response)
+ack.req(url).put(data).then(body,response)
+ack.req(url).delete().then(body,response)
 ```
 
 ### ack.router - middleware
 ```
+//INIT EXAMPLE, how all middleware is intended to be used
+var app = require('express')()//common request routing app
+var rs = require('ack-node').router()//get our ack routers
+//Now our app will ignore fav.ico, timeout in 3000ms, and all requests will be gzipped if applicable
+app.get('/', rs.ignoreFavors(), rs.timeout(3000), rs.compress)
+
+//Below is just blobs of use cases
+
 /** returns middleware that sets cache-control header for every request */
 ack.router().cacheFor(seconds)
 
