@@ -9,6 +9,11 @@ var File = function(path){
 	return this
 }
 
+/** Manipulates path by removing one file extension. Returns self */
+File.prototype.removeExt = function(){
+	this.path = this.path.replace(/\.[^.\/]+$/,'');return this
+}
+
 /** Creates new File instance with existing file path prepended. Leaves existing reference alone */
 File.prototype.Join = function(a,b,c){
 	var args = Array.prototype.slice.call(arguments)

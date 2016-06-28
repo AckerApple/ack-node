@@ -42,6 +42,8 @@ ack.file(__dirname).append(string).then()
 //string manipulations
 ack.file(__dirname).join('test-file.js').path
 ack.file(__dirname).Join('test-file.js').path//creates new instance, leaving original alone
+ack.file(__dirname).join('test-file.js').removeExt().path//Manipulates path by removing one file extension
+
 ```
 
 ### ack.path - system directory functionality

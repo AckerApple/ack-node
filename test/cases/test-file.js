@@ -16,6 +16,11 @@ describe('ack.file',function(){
 		TenFileSync = ack.file(tenFilePath).sync()
 	})
 
+	it('#removeExt',function(){
+		var p = ack.file(__dirname).join('test.js').removeExt().path
+		assert.equal(p, path.join(__dirname,'test'))
+	})
+
 	it('#join',function(){
 		var F1 = ack.file(__dirname)
 		F1.join('acker')
