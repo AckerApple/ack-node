@@ -16,6 +16,18 @@ describe('ack.file',function(){
 		TenFileSync = ack.file(tenFilePath).sync()
 	})
 
+	it('#join',function(){
+		var F1 = ack.file(__dirname)
+		F1.join('acker')
+		assert.equal(F1.path, path.join(__dirname,'acker'))
+	})
+
+	it('#Join',function(){
+		var F1 = ack.file(__dirname)
+		var F2 = F1.Join('acker')
+		assert.equal(F2.path, path.join(F1.path,'acker'))
+	})
+
 	describe('#sync',function(){
 		it('#readJson',function(){
 			var jsonPath = path.join(__dirname,'../../package.json')

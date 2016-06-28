@@ -1,11 +1,26 @@
 "use strict";
 var fs = require('fs'),
 	ack = require('../index.js'),
-	mime = require('mime')
+	mime = require('mime'),
+	nodePath = require('path')
 
 var File = function(path){
 	this.path = path
 	return this
+}
+
+/** Creates new File instance with existing file path prepended. Leaves existing reference alone */
+File.prototype.Join = function(a,b,c){
+	var args = Array.prototype.slice.call(arguments)
+	args.unshift(this.path)
+	return new File( nodePath.join.apply(nodePath, args) )
+}
+
+/** appends onto existing file path */
+File.prototype.join = function(a,b,c){
+	var args = Array.prototype.slice.call(arguments)
+	args.unshift(this.path)
+	this.path = nodePath.join.apply(nodePath, args);return this
 }
 
 //callback(error,result)

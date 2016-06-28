@@ -1,13 +1,14 @@
 {
   "name": "ack-node",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha ./test/cases --recursive --watch"
+    "test": "mocha ./test/cases --recursive",
+    "test:watch": "mocha ./test/cases --recursive --watch"
   },
   "repository": {
     "type": "git",

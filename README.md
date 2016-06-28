@@ -38,6 +38,10 @@ ack.file(__dirname).getMimeType()//Ex: application/javascript
 ack.file(__dirname).stat().then(stats=>stats.size)
 ack.file(__dirname).write(string).then()
 ack.file(__dirname).append(string).then()
+
+//string manipulations
+ack.file(__dirname).join('test-file.js').path
+ack.file(__dirname).Join('test-file.js').path//creates new instance, leaving original alone
 ```
 
 ### ack.path - system directory functionality
