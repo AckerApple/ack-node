@@ -1,6 +1,6 @@
 {
   "name": "ack-node",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/AckerApple/ack-node#readme",
   "dependencies": {
+    "ack-path": "^1.0.0",
     "ack-x": "^1.2.5",
     "body-parser": "^1.15.1",
     "compression": "^1.6.2",

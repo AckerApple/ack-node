@@ -31,22 +31,8 @@ ack.ip('192.168.0.0').isPrivate()
 ack.ip('127.0.0.0').isHost()
 ```
 
-### ack.file - system file functionality
-```
-ack.file(__dirname).delete().then()
-ack.file(__dirname).getMimeType()//Ex: application/javascript
-ack.file(__dirname).stat().then(stats=>stats.size)
-ack.file(__dirname).write(string).then()
-ack.file(__dirname).append(string).then()
-
-//string manipulations
-ack.file(__dirname).join('test-file.js').path
-ack.file(__dirname).Join('test-file.js').path//creates new instance, leaving original alone
-ack.file(__dirname).join('test-file.js').removeExt().path//Manipulates path by removing one file extension
-
-```
-
 ### ack.path - system directory functionality
+See [ack-path](https://www.npmjs.com/package/ack-path) for full details
 ```
 //created directory if not existant
 ack.path(__dirname).paramDir().then()
@@ -70,6 +56,21 @@ ack.path('/test/').removeFile().path// = /test/
 ack.path(__dirname).delete().then()
 
 ack.path(__dirname).sync().exists()//NONASYNC
+```
+
+### ack.file - system file functionality
+See [ack-path](https://www.npmjs.com/package/ack-path) for full details
+```
+ack.file(__dirname).delete().then()
+ack.file(__dirname).getMimeType()//Ex: application/javascript
+ack.file(__dirname).stat().then(stats=>stats.size)
+ack.file(__dirname).write(string).then()
+ack.file(__dirname).append(string).then()
+
+//string manipulations
+ack.file(__dirname).join('test-file.js').path
+ack.file(__dirname).Join('test-file.js').path//creates new instance, leaving original alone
+ack.file(__dirname).join('test-file.js').removeExt().path//Manipulates path by removing one file extension
 ```
 
 ### ack.jwt - json web tokens
