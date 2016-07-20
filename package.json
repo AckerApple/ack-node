@@ -1,6 +1,6 @@
 {
   "name": "ack-node",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
@@ -36,17 +36,13 @@
     "etag": "^1.7.0",
     "jade": "^1.11.0",
     "jsonwebtoken": "^7.0.1",
-    "mime": "^1.3.4",
-    "mkdirp": "^0.5.1",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
     "multiparty": "^4.1.2",
     "node-schedule": "^1.1.0",
     "nodedump": "^0.0.8",
     "nodemailer": "^2.4.2",
-    "readdir": "^0.0.13",
     "request": "^2.72.0",
-    "rimraf": "^2.5.2",
     "ua-parser-js": "^0.7.10"
   },
   "devDependencies": {
