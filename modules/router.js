@@ -47,9 +47,17 @@ module.exports.compress = function(options){
 }
 
 /** returns middleware for cross orgin services
-	@options{origin:'url-string'}. No options means allow all. See package cors
+	@options{
+		origin:'*',
+		maxAge: 3000//Access-Control-Allow-Max-Age CORS header default 50 minutes
+	}
 */
 module.exports.cors = function(options){
+	options = options || {}
+	
+	//prevent subsequent OPTIONS requests
+	options.maxAge = options.maxAge==null ? 3000 : options.maxAge
+
 	return cors(options)
 }
 
