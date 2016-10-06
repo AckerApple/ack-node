@@ -31,6 +31,7 @@ req.prototype.setUrl = function(url){
 	this.options.set('uri',url);return this
 }
 
+/** name,val or {name:val} */
 req.prototype.option = function(){
 	this.options.set.apply(this.options,arguments)
 	return this
@@ -135,7 +136,7 @@ req.prototype.put = function(dataOrAddress, data){
 	return this.send()
 }
 
-req.prototype.send = function(address){
+req.prototype.send = function(address, options){
 	var req,
 		ops = this.getTransmissionOptions(),
 		body = ''
@@ -144,6 +145,8 @@ req.prototype.send = function(address){
 		var orgUrl = ops.uri;
 		ops.uri = ops.uri ? ops.uri += address : address
 	}
+
+	if(options)Object.assign(ops, options)
 
 	this.preSendOps(ops)
 

@@ -208,6 +208,10 @@ module.exports.jwt = function(secret,options){
 
 	format url-short is a custom morgan.token()
 	format colored-status is a custom morgan.token()
+
+	@options{
+		stream - Output stream for writing log lines, defaults to process.stdout
+	}
 */
 module.exports.logging = function(format,options){
 	if(!format){
