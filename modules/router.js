@@ -52,7 +52,7 @@ module.exports.respond = function(string, options){
 
 	var eTag = ack.etag(string)
 
-	return function(req,res){
+	return function(req,res,next){
 		var noMatchHead = ack.reqres(req,res).input.header('If-None-Match')
 
 		if(noMatchHead == eTag){
@@ -65,15 +65,7 @@ module.exports.respond = function(string, options){
 			res.setHeader('Content-Type', type)
 			res.end(string)
 		}
-
 	}
-
-	var output = getResOutput(this.res)
-	var eTagVal = etag(output)
-
-	this.res.setHeader('ETag', eTagVal)
-
-
 }
 
 /** returns middleware that GZIP requests. See npm compression */
