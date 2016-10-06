@@ -496,10 +496,6 @@ function jsonCloseError(options){
 			var msg = err.message || err.code
 			res.statusCode = err.status || err.statusCode || 500
 			res.statusMessage = msg
-			var output = JSON.stringify(rtn)
-			res.setHeader('message',msg)
-			res.setHeader('Content-Type','application/json')
-			res.setHeader('Content-Length',output.length)
 
 	    var rtn = {
 	      error: {
@@ -510,6 +506,11 @@ function jsonCloseError(options){
 					}
 	      }
 	    }
+
+			var output = JSON.stringify(rtn)
+			res.setHeader('message',msg)
+			res.setHeader('Content-Type','application/json')
+			res.setHeader('Content-Length',output.length)
 
 	    var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
 	    if(isDebug){
