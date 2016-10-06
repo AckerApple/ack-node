@@ -41,6 +41,13 @@ module.exports.timeout = function(ms, options){
 	return connectTimeout(ms, options)
 }
 
+/** returns string to requests */
+module.exports.respond = function(string, options){
+	return function(req,res){
+		res.end(string)
+	}
+}
+
 /** returns middleware that GZIP requests. See npm compression */
 module.exports.compress = function(options){
 	return compression(options)
