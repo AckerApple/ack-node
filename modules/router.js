@@ -43,15 +43,11 @@ module.exports.timeout = function(ms, options){
 
 /** returns string to requests */
 module.exports.respond = function(string, options){
+	let type = 'text/plain'
+	
 	if(typeof string!='string'){
-		function getType(){
-			return 'application/json'
-		}
+		type = 'application/json'
 		string = JSON.stringify(string)
-	}else{
-		function getType(){
-			return 'text/plain'
-		}		
 	}
 
 	var eTag = ack.etag(string)
@@ -66,7 +62,7 @@ module.exports.respond = function(string, options){
 		}else{
 			res.setHeader('ETag', eTag)
 			res.setHeader('Content-Length', string.length)
-			res.setHeader('Content-Type', getType())
+			res.setHeader('Content-Type', type)
 			res.end(string)
 		}
 
