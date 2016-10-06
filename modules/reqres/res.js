@@ -1,236 +1,236 @@
 "use strict";
-var	ack = require('../../index.js'),
-	reqrtn = require('./req'),
-	cookies = require('cookies'),
-	etag = require('etag'),
-	fs = require('fs'),
-	isProductionMode = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase()=='production'
+var ack = require('../../index.js'),
+  reqrtn = require('./req'),
+  cookies = require('cookies'),
+  etag = require('etag'),
+  fs = require('fs'),
+  isProductionMode = process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase()=='production'
 
 
 //inbound request response processor
 //returns function that appends output that also has a tun of helper methods
 var reqres = function(res, req){
-	if(req && req._headers){
-		throw new Error('Received response object where request object was expected');
-	}
-	this.res=res;this.req=req
+  if(req && req._headers){
+    throw new Error('Received response object where request object was expected');
+  }
+  this.res=res;this.req=req
 
-	if(res){
-		if(res.$ && res.$.data){
-			this.data = res.$.data
-		}else{
-			this.data = {error:null}
-			if(!res.$){
-				res.$ = this
-			}
-		}
-	}
+  if(res){
+    if(res.$ && res.$.data){
+      this.data = res.$.data
+    }else{
+      this.data = {error:null}
+      if(!res.$){
+        res.$ = this
+      }
+    }
+  }
 
-	return this//returns function that appends output
+  return this//returns function that appends output
 }
 
 reqres.prototype.relocate = function(url, statusMessage, statusCode){
-	statusCode = statusCode || 301;
-	this.res.statusCode = statusCode;
-	this.res.statusMessage = statusMessage;
-	this.res.setHeader('Location', url)
-	this.close();
-	return this;
+  statusCode = statusCode || 301;
+  this.res.statusCode = statusCode;
+  this.res.statusMessage = statusMessage;
+  this.res.setHeader('Location', url)
+  this.close();
+  return this;
 }
 
 //ops (only applies when output is typeof object. See function dump())
 reqres.prototype.append = function(output, ops){
-	var isBuffer = Buffer.isBuffer(output);
+  var isBuffer = Buffer.isBuffer(output);
 
-	if(!isBuffer){
-		switch(typeof(output)){
-			case 'object':
-				ops = ops || {}
-				ops.levels = ops.levels || 3
-				ops.collapse = ops.collapse || ['function']
-				output = ack(output).dump(ops)
-				//output = ack(output).dump('html',ops)
-				break;
-		}
-	}
+  if(!isBuffer){
+    switch(typeof(output)){
+      case 'object':
+        ops = ops || {}
+        ops.levels = ops.levels || 3
+        ops.collapse = ops.collapse || ['function']
+        output = ack(output).dump(ops)
+        //output = ack(output).dump('html',ops)
+        break;
+    }
+  }
 
-	//this.data.output += output;
-	this.res.$.data.output = this.res.$.data.output ? this.res.$.data.output+output : output;
-	return this
+  //this.data.output += output;
+  this.res.$.data.output = this.res.$.data.output ? this.res.$.data.output+output : output;
+  return this
 }
 reqres.prototype.output = reqres.prototype.append
 
 //ops:format,label,expand,collapse,show,hide,hideTypes,top,levels,sortKeys,syntaxHighlight,dumpFunctionName
 reqres.prototype.dump = function(v,ops){
-	ops = ops || {}
+  ops = ops || {}
 
-	if( !ops.format && this.isHtml() ){
-		ops.format = 'html'
-	}
+  if( !ops.format && this.isHtml() ){
+    ops.format = 'html'
+  }
 
-	return this.append(v,ops)
+  return this.append(v,ops)
 }
 
 reqres.isResHeaderSent = function(res){
-	return res.closed || res._headerSent
+  return res.closed || res._headerSent
 
 }
 
 reqres.prototype.isHeaderSent = function(){
-	return reqres.isResHeaderSent(this.res)
+  return reqres.isResHeaderSent(this.res)
 }
 
 /** if request is open, optional content can be appended to output and then the request is closed */
 reqres.prototype.close = function(o,ops){
-	if( !this.isHeaderSent() ){
-		if(o)this.append(o,ops)
-		xreqhan(this.res, this.req);
-	}
-	return this
+  if( !this.isHeaderSent() ){
+    if(o)this.append(o,ops)
+    xreqhan(this.res, this.req);
+  }
+  return this
 }
 
 //has the response been put into HTML mode? default=acceptsHtml()
 reqres.prototype.isHtml = function(yN){
-	if(this.res.$.data.isHtml===false || this.res.$.data.isHtml===true){
-		return this.res.$.data.isHtml
-	}
-	var rr = new reqrtn(this.req, this.res)
-	return rr.acceptsHtml()
+  if(this.res.$.data.isHtml===false || this.res.$.data.isHtml===true){
+    return this.res.$.data.isHtml
+  }
+  var rr = new reqrtn(this.req, this.res)
+  return rr.acceptsHtml()
 }
 
 reqres.prototype.prepend = function(s){
-	this.res.$.data.output = s + this.res.$.data.output;return this
+  this.res.$.data.output = s + this.res.$.data.output;return this
 }
 
 /** request is closed with optional output append to request */
 reqres.prototype.abort = function(o,ops){
-	if(o)this.append(o,ops)
-	xreqhan(this.res, this.req)
-	return this
+  if(o)this.append(o,ops)
+  xreqhan(this.res, this.req)
+  return this
 }
 reqres.prototype.send = reqres.prototype.abort//two names same game
 
 reqres.prototype.sendHTML = function(html){
-	this.res.setHeader('content-type','text/html')
-	this.send(html)
+  this.res.setHeader('content-type','text/html')
+  this.send(html)
 }
 reqres.prototype.sendHtml = reqres.prototype.sendHTML
 
 reqres.prototype.sendJSON = function(data){
-	try{
-		data = JSON.stringify(data)
-	}catch(e){}
-	this.res.setHeader('content-type', 'application/json')
-	this.send(data)
+  try{
+    data = JSON.stringify(data)
+  }catch(e){}
+  this.res.setHeader('content-type', 'application/json')
+  this.send(data)
 }
 reqres.prototype.sendJson = reqres.prototype.sendJson
 
 
 reqres.prototype.sendFileByPath = function(path, mimeType){
-	var jFile = ack.file(path);
-	return jFile.stat().bind(this)
-	.then(function(stats){
-		if(!mimeType){
-			mimeType = jFile.getMimeType()
-		}
+  var jFile = ack.file(path);
+  return jFile.stat().bind(this)
+  .then(function(stats){
+    if(!mimeType){
+      mimeType = jFile.getMimeType()
+    }
 
-		this.res.statusCode = 200
-		this.res.setHeader('Content-Length', stats.size)
-		this.res.setHeader('Content-Type', mimeType)
-		return path
-	})
-	.then(fs.createReadStream)
-	.then(function(rs){
-		rs.pipe(this.res)
-	})
+    this.res.statusCode = 200
+    this.res.setHeader('Content-Length', stats.size)
+    this.res.setHeader('Content-Type', mimeType)
+    return path
+  })
+  .then(fs.createReadStream)
+  .then(function(rs){
+    rs.pipe(this.res)
+  })
 }
 
 /** cookies().set(name, [value], [{maxAge,expires,path,domain,secure,secureProxy,httpOnly,signed,overwrite}]) */
 reqres.prototype.cookies = function(){
-	if(this.Cookies)return this.Cookies
-	this.Cookies = new cookies(this.req, this.res)
-	return this.Cookies
+  if(this.Cookies)return this.Cookies
+  this.Cookies = new cookies(this.req, this.res)
+  return this.Cookies
 }
 
 /** ! DEPRECATED ! */
 reqres.prototype.ci = function(){
-	if(this.ClientInput)return this.ClientInput
-	this.ClientInput = new ClientInput(this.res, this.req)
-	return this.ClientInput
+  if(this.ClientInput)return this.ClientInput
+  this.ClientInput = new ClientInput(this.res, this.req)
+  return this.ClientInput
 }
 
 //creates new error object to make an in-line stack trace. Adds error object to output
 reqres.prototype.throw = function(err){
-	var dumper
+  var dumper
 /* //removed 2/2/2016
-	if(typeof(err)=='object' && err.stack){// && e.constructor.name=='Error' || e.constructor.name=='SyntaxError'
-		dumper = {
-			stack      : err.stack.split(' at '),//back to string
-			err        : err,
-			stackTrace : err.stack,
-			message    : err.message
-		}
-		//for(x in e)d[x] = e[x]
-	}else
+  if(typeof(err)=='object' && err.stack){// && e.constructor.name=='Error' || e.constructor.name=='SyntaxError'
+    dumper = {
+      stack      : err.stack.split(' at '),//back to string
+      err        : err,
+      stackTrace : err.stack,
+      message    : err.message
+    }
+    //for(x in e)d[x] = e[x]
+  }else
 */
-	if(err && err.constructor==String){
-		dumper = new Error(err)
-		err = dumper
-		ack.error(dumper).cutFirstTrace()
-	}else{
-		dumper = err
-	}
+  if(err && err.constructor==String){
+    dumper = new Error(err)
+    err = dumper
+    ack.error(dumper).cutFirstTrace()
+  }else{
+    dumper = err
+  }
 
-	if(this.catcherArray){
-		this.catcherArray.forEach(function(catcher,i){
-			catcher(err)
-		})
-	}
+  if(this.catcherArray){
+    this.catcherArray.forEach(function(catcher,i){
+      catcher(err)
+    })
+  }
 
-	reqResThrow(this.req, this.res, dumper)
+  reqResThrow(this.req, this.res, dumper)
 
-	return this
+  return this
 }
 
 reqres.prototype.catch = function(method){
-	this.catcherArray = this.catcherArray || [];
-	this.catcherArray.push(method)
-	return this
+  this.catcherArray = this.catcherArray || [];
+  this.catcherArray.push(method)
+  return this
 }
 
 //adds error object to output
 reqres.prototype.error = function(e){
-	var x,sa,d={}
+  var x,sa,d={}
 
-	for(x in e)d[x] = e[x]
-	d.stack = e.stack//back to string
+  for(x in e)d[x] = e[x]
+  d.stack = e.stack//back to string
 
-	this.res.$.data.error = d
+  this.res.$.data.error = d
 
-	return this
+  return this
 }
 
 /** looks at generated output to create an etag header. If client ETag header "If-None-Match" present and it matches generated etag, output is cleared and 304 cache indicator is fired */
 reqres.prototype.etag = function(options){
-	var options = options || {}
-	if(options.weak==null){
-		options.weak = true
-	}
+  var options = options || {}
+  if(options.weak==null){
+    options.weak = true
+  }
 
-	var noMatchHead = ack.reqres(this.req,this.res).input.header('If-None-Match')
-	var output = getResOutput(this.res)
-	var eTagVal = etag(output)
+  var noMatchHead = ack.reqres(this.req,this.res).input.header('If-None-Match')
+  var output = getResOutput(this.res)
+  var eTagVal = etag(output)
 
-	this.res.setHeader('ETag', eTagVal)
+  this.res.setHeader('ETag', eTagVal)
 
-	if(noMatchHead == eTagVal){
-		this.res.$.data.output = '';
+  if(noMatchHead == eTagVal){
+    this.res.$.data.output = '';
 
-		this.res.statusCode = 304
-		this.res.statusMessage = 'Not Modified'
-	}
+    this.res.statusCode = 304
+    this.res.statusMessage = 'Not Modified'
+  }
 
-	return this
+  return this
 }
 
 
@@ -240,106 +240,115 @@ reqres.prototype.etag = function(options){
 
 //error handler
 reqres.geterrhan = function(){
-	return function(err, req, res, next){
-		try{
-			new reqres(res, req).throw(err)
-		}catch(e){
-			console.trace('!!!jE THROW PROCESSING FAILED!!!',e.stack)
-			throw(err)
-		}
-		//next()
-	}
+  return function(err, req, res, next){
+    try{
+      new reqres(res, req).throw(err)
+    }catch(e){
+      console.trace('!!!jE THROW PROCESSING FAILED!!!',e.stack)
+      throw(err)
+    }
+    //next()
+  }
 }
 
 //return close request handler function with
 reqres.getxreqhan = function(){
-	return function(req,res,next){
-		if(!reqres.isResHeaderSent(res)){
-			xreqhan(res, req);
-		}
-	}
+  return function(req,res,next){
+    if(!reqres.isResHeaderSent(res)){
+      xreqhan(res, req);
+    }
+  }
 }
 
 
 
 /* !!! DEPRECATED !!! */
-	var ClientInput = function ClientInput(res, req){
-		this.res=res;this.req=req;
-		return this
-	}
+  var ClientInput = function ClientInput(res, req){
+    this.res=res;this.req=req;
+    return this
+  }
 
-	/** cookies().set(name, [value], [{maxAge,expires,path,domain,secure,secureProxy,httpOnly,signed,overwrite}]) */
-	ClientInput.prototype.cookies = function(){
-		if(this.Cookies)return this.Cookies
-		this.Cookies = new cookies(this.req, this.res)
-		return this.Cookies
-	}
+  /** cookies().set(name, [value], [{maxAge,expires,path,domain,secure,secureProxy,httpOnly,signed,overwrite}]) */
+  ClientInput.prototype.cookies = function(){
+    if(this.Cookies)return this.Cookies
+    this.Cookies = new cookies(this.req, this.res)
+    return this.Cookies
+  }
 /* END */
 
 /** only returns output data collected by reqres */
 function getResOutput(res){
-	if(res.$ && res.$.data && res.$.data.output){
-		return res.$.data.output
-	}
+  if(res.$ && res.$.data && res.$.data.output){
+    return res.$.data.output
+  }
 }
 
 /** close request handler */
 function xreqhan(res, req){
-	if(reqres.isResHeaderSent(res)){
-		return console.error('request already closed', new Error().stack)
-	}
+  if(reqres.isResHeaderSent(res)){
+    return console.error('request already closed', new Error().stack)
+  }
 
-	var output = getResOutput(res) || ''
+  var output = getResOutput(res) || ''
 
-	var isBinary = output && Buffer.isBuffer(output)
-	if(isBinary){
-		res.end(output,'binary')
-	}else if(res.send){//Express adds send
-		res.send(output)
-	}else if(res.end){//base way to end request
-		var isHtml = new reqres(res, req).isHtml()
-		if(isHtml){
-			res.statusCode = 200
-			if(res.getHeader('content-type')==null){
-				res.setHeader('content-type','text/html')
-			}
-		}
-		res.end(output)
-	}
+  var isBinary = output && Buffer.isBuffer(output)
+  if(isBinary){
+    res.end(output,'binary')
+  }else if(res.send){//Express adds send
+    res.send(output)
+  }else if(res.end){//base way to end request
+    if(output){
+      if( res.getHeader('content-type')==null ){
+        if(ack.reqres(res, req).isHtml()){
+          res.setHeader('content-type','text/html')
+        }else{
+          res.setHeader('content-type','text/plain')
+        }
+      }
 
-	resMarkClosed(res)//add indicators that show response has been closed
+      if(res.getHeader('content-length')==null){
+        res.setHeader('content-length', output.length)
+      }
+    }else{
+      res.statusCode = res.statusCode || 204
+    }
+
+    res.end(output)
+  }
+
+  resMarkClosed(res)//add indicators that show response has been closed
 }
 
 function getErrorMsg(err){
-	return err.message || err.code
+  return err.message || err.code
 }
 
 
 /** Handles sending errors back to client including approperiate error details.
-	- response status always 500 unless (err.status || err.statusCode)
+  - response status always 500 unless (err.status || err.statusCode)
 */
 var reqResThrow = function(req, res, err){
-	if(reqres.isResHeaderSent(res)){//request has already been closed
-		//console.log('cannot throw error on an already closed request')
-		return;
-	}
+  if(reqres.isResHeaderSent(res)){//request has already been closed
+    //console.log('cannot throw error on an already closed request')
+    return;
+  }
 
-	if(typeof(err.stack)=='string'){
-		err.stack = err.stack.split(' at ')//stack string to array
-	}
+  if(typeof(err.stack)=='string'){
+    err.stack = err.stack.split(' at ')//stack string to array
+  }
 
-	var isHtml = new reqres(res, req).isHtml()
-	if( isHtml ){
-		ack.router().htmlCloseError({debug:isProductionMode})(err,req,res)
-	}else{
-		ack.router().jsonCloseError({debug:isProductionMode})(err,req,res)
-	}
+  var isHtml = new reqres(res, req).isHtml()
+  if( isHtml ){
+    ack.router().htmlCloseError({debug:isProductionMode})(err,req,res)
+  }else{
+    ack.router().jsonCloseError({debug:isProductionMode})(err,req,res)
+  }
 
-	resMarkClosed(res)
+  resMarkClosed(res)
 }
 
 var resMarkClosed = function(res){
-	res.closed=1
+  res.closed=1
 }
 
 module.exports = reqres
