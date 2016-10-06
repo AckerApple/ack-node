@@ -96,10 +96,11 @@ module.exports.relocate = function(url){
 }
 
 /** returns middleware that 404s requests matching typical fav.ico files */
-module.exports.ignoreFavors = function(){
+module.exports.ignoreFavors = function(statusCode){
+	stausCode = stausCode || 404
 	return function(req, res, next) {
     if(/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)){
-      res.status(404).end();
+      res.status(statusCode).end();
     }else if(next){
       next()
     }
