@@ -43,9 +43,41 @@ module.exports.timeout = function(ms, options){
 
 /** returns string to requests */
 module.exports.respond = function(string, options){
-	return function(req,res){
-		res.end(string)
+	if(typeof string!='string'){
+		function getType(){
+			return 'application/json'
+		}
+		string = JSON.stringify(string)
+	}else{
+		function getType(){
+			return 'text/plain'
+		}		
 	}
+
+	var eTag = ack.etag(string)
+
+	return function(req,res){
+		var noMatchHead = ack.reqres(req,res).input.header('If-None-Match')
+
+		if(noMatchHead == eTag){
+			res.statusCode = 304
+			res.statusMessage = 'Not Modified'
+			res.end()
+		}else{
+			res.setHeader('ETag', eTag)
+			res.setHeader('Content-Length', string.length)
+			res.setHeader('Content-Type', getType())
+			res.end(string)
+		}
+
+	}
+
+	var output = getResOutput(this.res)
+	var eTagVal = etag(output)
+
+	this.res.setHeader('ETag', eTagVal)
+
+
 }
 
 /** returns middleware that GZIP requests. See npm compression */
@@ -468,7 +500,10 @@ function jsonCloseError(options){
 			var msg = err.message || err.code
 			res.statusCode = err.status || err.statusCode || 500
 			res.statusMessage = msg
+			var output = JSON.stringify(rtn)
 			res.setHeader('message',msg)
+			res.setHeader('Content-Type','application/json')
+			res.setHeader('Content-Length',output.length)
 
 	    var rtn = {
 	      error: {
@@ -485,7 +520,7 @@ function jsonCloseError(options){
 	      rtn.error.stack = err.stack//debug requests will get stack traces
 	    }
 
-	    res.end( JSON.stringify(rtn) );
+	    res.end( output );
 	  }catch(e){
 	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
 	    console.error(e)

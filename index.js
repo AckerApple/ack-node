@@ -29,6 +29,7 @@ ack.modules.define('template', function(filePath, locals){
 
 ack.modules.definePath('mail', path.join(modulesPath,'Mail.js'))
 
+ack.Expose.prototype.etag = require('etag')
 /**
 	@options - {
 		label,expand,top,levels
