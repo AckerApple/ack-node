@@ -81,16 +81,18 @@ reqres.prototype.isHeaderSent = function(){
 }
 
 //closing request handler
+/*
 reqres.prototype.send = function(output){
   return xreqhan(this.res, this.req, output)
-}
+}*/
 
 
 /** if request is open, optional content can be appended to output and then the request is closed */
 reqres.prototype.close = function(o,ops){
   if( !this.isHeaderSent() ){
     if(o)this.append(o,ops)
-    xreqhan(this.res, this.req);
+    var output = getResOutput(this.res)
+    xreqhan(this.res, this.req, output);
   }
   return this
 }
@@ -115,7 +117,7 @@ reqres.prototype.abort = function(output){
   xreqhan(this.res, this.req, output)
   return this
 }
-//reqres.prototype.send = reqres.prototype.abort//two names same game
+reqres.prototype.send = reqres.prototype.abort//two names same game
 
 reqres.prototype.sendHTML = function(html){
   this.res.setHeader('content-type','text/html')
@@ -258,7 +260,6 @@ reqres.geterrhan = function(){
   }
 }
 
-//return close request handler function with
 /*
 reqres.getxreqhan = function(){
   return function(req,res,next){
@@ -305,14 +306,14 @@ function xreqhan(res, req, output){
   }else if(res.send){//Express adds send
     res.send(output)
   }else if(res.end){//base way to end request
-    output = responseOutputToString(res, output)
+    output = reqResOutputToString(req, res, output)
     res.end(output)
   }
 
   resMarkClosed(res)//add indicators that show response has been closed
 }
 
-function responseOutputToString(res, output){
+function reqResOutputToString(req, res, output){
   if( res.getHeader('content-type')==null ){
     if(output===null || typeof output=='object'){
       output = JSON.stringify(output)
