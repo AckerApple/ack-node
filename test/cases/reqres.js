@@ -127,6 +127,15 @@ describe('reqres',function(){
 				res = response
 				reqres = ack.reqres(req,res)
 
+				if(reqres.path().string=='/etag-test'){
+
+try{
+					return reqres.etag({test:22})
+}catch(e){
+	console.log(e)
+}
+				}
+
 				reqres.req.input().parseFormVars().then(closeReqRes)
 			}).listen(3001,done)
 		})
@@ -146,6 +155,27 @@ describe('reqres',function(){
 				body = JSON.parse(body)
 				assert.equal(body.isMultipart, false)
 				assert.equal(body.forms.testVar, 22)
+			})
+			.then(done).catch(done)
+		})
+
+		it('etag',function(done){
+			var etag=0
+
+			ack.req().send('localhost:3001/etag-test')
+			.then(function(body,response){
+				assert.equal(body, '{"test":22}')
+				assert.equal(response.headers.etag, '"b-6VkZ+HYGr0uajuu/ajew9Q"')
+				assert.equal(response.headers['content-type'], 'application/json')
+				assert.equal(response.headers['content-length'], 11)
+				etag = response.headers.etag
+			})
+			.then(()=>{
+				return ack.req().header('If-None-Match',etag).send('localhost:3001/etag-test')
+			})
+			.then(function(body,response){
+				assert.equal(response.statusCode, 304)
+				assert.equal(response.statusMessage, 'Not Modified')
 			})
 			.then(done).catch(done)
 		})

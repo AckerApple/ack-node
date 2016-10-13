@@ -80,6 +80,12 @@ reqres.prototype.isHeaderSent = function(){
   return reqres.isResHeaderSent(this.res)
 }
 
+//closing request handler
+reqres.prototype.send = function(output){
+  return xreqhan(this.res, this.req, output)
+}
+
+
 /** if request is open, optional content can be appended to output and then the request is closed */
 reqres.prototype.close = function(o,ops){
   if( !this.isHeaderSent() ){
@@ -103,12 +109,13 @@ reqres.prototype.prepend = function(s){
 }
 
 /** request is closed with optional output append to request */
-reqres.prototype.abort = function(o,ops){
-  if(o)this.append(o,ops)
-  xreqhan(this.res, this.req)
+reqres.prototype.abort = function(output){
+  //if(o)this.append(o,ops)
+  output = output || getResOutput(this.res)
+  xreqhan(this.res, this.req, output)
   return this
 }
-reqres.prototype.send = reqres.prototype.abort//two names same game
+//reqres.prototype.send = reqres.prototype.abort//two names same game
 
 reqres.prototype.sendHTML = function(html){
   this.res.setHeader('content-type','text/html')
@@ -252,6 +259,7 @@ reqres.geterrhan = function(){
 }
 
 //return close request handler function with
+/*
 reqres.getxreqhan = function(){
   return function(req,res,next){
     if(!reqres.isResHeaderSent(res)){
@@ -259,7 +267,7 @@ reqres.getxreqhan = function(){
     }
   }
 }
-
+*/
 
 
 /* !!! DEPRECATED !!! */
@@ -284,12 +292,12 @@ function getResOutput(res){
 }
 
 /** close request handler */
-function xreqhan(res, req){
+function xreqhan(res, req, output){
   if(reqres.isResHeaderSent(res)){
     return console.error('request already closed', new Error().stack)
   }
 
-  var output = getResOutput(res) || ''
+  output = output || ''
 
   var isBinary = output && Buffer.isBuffer(output)
   if(isBinary){
@@ -297,26 +305,32 @@ function xreqhan(res, req){
   }else if(res.send){//Express adds send
     res.send(output)
   }else if(res.end){//base way to end request
-    if(output){
-      if( res.getHeader('content-type')==null ){
-        if(ack.reqres(res, req).isHtml()){
-          res.setHeader('content-type','text/html')
-        }else{
-          res.setHeader('content-type','text/plain')
-        }
-      }
-
-      if(res.getHeader('content-length')==null){
-        res.setHeader('content-length', output.length)
-      }
-    }else{
-      res.statusCode = res.statusCode || 204
-    }
-
+    output = responseOutputToString(res, output)
     res.end(output)
   }
 
   resMarkClosed(res)//add indicators that show response has been closed
+}
+
+function responseOutputToString(res, output){
+  if( res.getHeader('content-type')==null ){
+    if(output===null || typeof output=='object'){
+      output = JSON.stringify(output)
+      res.setHeader('content-type','application/json')
+    }else if(ack.reqres(res, req).isHtml()){
+      res.setHeader('content-type','text/html')
+    }else{
+      res.setHeader('content-type','text/plain')
+    }
+  }
+
+  if(res.getHeader('content-length')==null && output && output.length){
+    res.setHeader('content-length', output.length)
+  }else{
+    res.statusCode = res.statusCode || 204
+  }
+
+  return output
 }
 
 function getErrorMsg(err){

@@ -40,12 +40,37 @@ var reqres = function reqres(req, res, $scope){
 }
 
 /* res */
+	//closes request
+	reqres.prototype.etag = function(string){
+		var isJson = string===null || typeof string!='string';
+
+		if(isJson){
+			var eTag = ack.etag(JSON.stringify(string))
+		}else{
+			var eTag = ack.etag(string)
+		}
+
+		var res = this.res.res
+
+		var noMatchHead = this.input.header('If-None-Match')
+
+		if(noMatchHead == eTag){
+			res.statusCode = 304
+			res.statusMessage = 'Not Modified'
+			res.end()
+		}else{
+			res.setHeader('ETag', eTag)
+			this.res.abort(string)
+		}
+	}
+
 	reqres.prototype.setStatus = function(code, message){
 		this.res.res.statusCode = code
 		this.res.res.statusMessage = message
 		return this
 	}
 
+	/* params storage string on response object that needs to be sent with closing request */
 	reqres.prototype.output = function(anything){
 		return this.res.append.apply(this.res,arguments)
 	}
