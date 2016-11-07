@@ -1,6 +1,9 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.24] - 2016-10-18
+### Fixed
+- Connected bodyParser options
 
 ## [1.0.23] - 2016-10-18
 ### update ack-path from 1.0.1 to 1.1.0

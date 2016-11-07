@@ -105,6 +105,7 @@ var reqres = function reqres(req, res, $scope){
 	reqres.prototype.abort = function(output, options){
 		return this.res.abort.apply(this.res,arguments)
 	}
+	reqres.prototype.send = reqres.prototype.abort
 
 	//has the response been put into HTML mode? default=acceptsHtml()
 	reqres.prototype.isHtml = function(yN){

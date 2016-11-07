@@ -282,19 +282,33 @@ module.exports.throw = function(ErrorOrMessage){
 	}
 }
 
-/** returns middleware that parses request bodies */
+/**
+	returns middleware that parses request bodies
+	@options - {
+		limit:102400//max bytes for body
+	}
+*/
 module.exports.parseBody = function(options){
 	options = options || {}
+	
+	const urlOps = Object.assign({extended:true}, options)
+	const urlEncoder = bodyParser.urlencoded(urlOps)
+	
+	const jsonBody = bodyParser.json(options)
+	const jsonOps = Object.assign({type: 'application/vnd.api+json'}, options)
+	
+	const jsonParser = bodyParser.json(jsonOps)
+
 	return function(req,res,next){
 	  var promise = ack.promise()
 	  .callback(function(callback){
-	    bodyParser.urlencoded({extended:true})(req, res, callback)
+	    urlEncoder(req, res, callback)
 	  })
 	  .callback(function(callback){
-	    bodyParser.json()(req, res, callback)
+	    jsonBody(req, res, callback)
 	  })
 	  .callback(function(callback){
-	    bodyParser.json({type: 'application/vnd.api+json'})(req, res, callback)
+	  	jsonParser(req, res, callback)
 	  })
 
 	  //null/undefined to empty-string
