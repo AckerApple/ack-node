@@ -111,6 +111,13 @@ ack.req(url).delete().then(body,response)
 ### ack.reqres
 Request response handler
 
+sendJson(variable, pretty)
+```
+app.use((req,res)=>{
+  ack.reqres(req,res).sendJSON( {hello:"world"} )
+})
+```
+
 send file
 ```
 app.use((req,res)=>{

@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.25] - 2016-11-17
+### Added
+- reqres.res.sendJSON now has second parameter to allow pretty JSON
+
 ## [1.0.24] - 2016-10-18
 ### Fixed
 - Connected bodyParser options

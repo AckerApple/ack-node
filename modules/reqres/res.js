@@ -125,15 +125,14 @@ reqres.prototype.sendHTML = function(html){
 }
 reqres.prototype.sendHtml = reqres.prototype.sendHTML
 
-reqres.prototype.sendJSON = function(data){
+reqres.prototype.sendJSON = function(data, spaces){
   try{
-    data = JSON.stringify(data)
+    data = JSON.stringify(data, null, spaces)
   }catch(e){}
   this.res.setHeader('content-type', 'application/json')
   this.send(data)
 }
 reqres.prototype.sendJson = reqres.prototype.sendJson
-
 
 reqres.prototype.sendFileByPath = function(path, mimeType){
   var jFile = ack.file(path);

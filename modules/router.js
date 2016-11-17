@@ -295,8 +295,8 @@ module.exports.parseBody = function(options){
 	const urlEncoder = bodyParser.urlencoded(urlOps)
 	
 	const jsonBody = bodyParser.json(options)
-	const jsonOps = Object.assign({type: 'application/vnd.api+json'}, options)
 	
+	const jsonOps = Object.assign({type: 'application/vnd.api+json'}, options)
 	const jsonParser = bodyParser.json(jsonOps)
 
 	return function(req,res,next){
