@@ -22,11 +22,11 @@ module.exports.cacheFor = function(seconds){
 }
 
 /** returns middleware that throws 404 file not found errors */
-module.exports.notFound = function(){
+module.exports.notFound = function(msg){
 	return function(req, res, next) {
 		var reqres = ack.reqres(req,res)
 	  var reqPath = reqres.path().string
-	  var error = ack.error().types.notFound('Not Found - '+reqPath)
+	  var error = ack.error().types.notFound(msg || 'Not Found - '+reqPath)
 
 	  if(next){
 	  	next(error);

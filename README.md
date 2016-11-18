@@ -134,7 +134,7 @@ Access to Middleware
 const ackRouters = require('ack-node').router()
 ```
 
-- Mix with Connect or Express
+Mix with Connect or Express
 ```
 var app = require('express')()//common request routing app
 
@@ -142,156 +142,137 @@ var app = require('express')()//common request routing app
 app.get('/', ackRouters.ignoreFavors(), ackRouters.timeout(3000), ackRouters.compress)
 ```
 
-- returns middleware that sets cache-control header for every request
-```
-ackRouters.cacheFor(seconds)
-```
+#### Router Table of Contents
+- [.cacheFor(seconds)](#cacheforseconds)
+- [.notFound( optional_message )](#notfound-optional_message)
+- [.timeout(ms, options)](#timeoutms-options)
+- [.compress(options)](#compressoptions)
+- [.cors(options)](#cors)
+- [.relocate(url)](#relocate)
+- [.ignoreFavors()](#ignorefavors)
+- [.closeDevErrors()](#closedeverrors)
+- [.htmlCloseError(options)](#htmlcloseerror)
+- [.jsonCloseError(options)](#jsoncloseerror)
+- [.closeProductionErrors()](#closeproductionerrors)
+- [.consoleNonProductionErrors(options)](#consolenonproductionerrors)
+- [.urlVarAsAuthHeader(varName)](#urlvarasauthheadervarname)
+- [.cookieAsAuthHeader(varName)](#cookieasauthheadervarname)
+- [.jwt(secret,options)](#jwtsecretoptions)
+- [.logging(format,options)](#loggingformatoptions)
+- [.uploadByName(name, options)](#uploadbynamename-options)
+- [.methodNotAllowed(message)](#methodnotallowedmessage)
+- [.throw(ErrorOrMessage)](#throwerrorormessage)
+- [.parseBody(options)](#parsebody)
+- [.parseMultipartFields()](#parsemultipartfields)
+- [.uploadOneByName(name, options)](#uploadonebynamename-options)
+- [.uploadArrayByName(name, options)](#uploadarraybynamename-options)
+- [.localNetworkOnly(message)](#localnetworkonlymessage)
 
-- returns middleware that throws 404 file not found errors
-```
-ackRouters.notFound()
-```
 
-- returns middleware that forces requests to timeout. Uses npm connect-timeout
-```
-ackRouters.timeout(ms, options)
-```
+##### .cacheFor(seconds)
+return middleware that sets cache-control header for every request
 
-- returns middleware that GZIP requests. See npm compression
-```
-ackRouters.compress(options)
-```
+##### .notFound( optional_message )
 
-- returns middleware for cross orgin services
-> @options{origin:'url-string'}. No options means allow all. See package cors
+- optional_message: default='Not Found - ${path}'
 
-```
-ackRouters.cors(options)
-```
 
-- return middleware that pushes requests to a new url
-```
-ackRouters.relocate(url)
-```
+##### .timeout(ms, options)
+returns middleware that forces requests to timeout. Uses npm connect-timeout
 
-- returns middleware that 404s requests matching typical fav.ico files
-```
-ackRouters.ignoreFavors()
-```
 
-- returns middleware that closes errors with crucial details needed during development
-```
-ackRouters.closeDevErrors()
-```
+##### .compress(options)
+returns middleware that GZIP requests. See npm compression
 
-- Returns universal error handler middleware
-> @options {debug:true/false, debugLocalNetwork:true}
+##### .cors(options)
+returns middleware for cross orgin services
 
-```
-ackRouters.htmlCloseError(options)
-```
+- **options** {origin:'url-string'}. No options means allow all. See package cors
 
-- returns middleware that handles errors with JSON style details
-> @options {debug:true/false, debugLocalNetwork:true}
+##### .relocate(url)
+return middleware that pushes requests to a new url
 
-```
-ackRouters.jsonCloseError(options)
-```
+##### .ignoreFavors()
+returns middleware that 404s requests matching typical fav.ico files
 
-- returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown
-```
-ackRouters.closeProductionErrors()
-```
+##### .closeDevErrors()
+returns middleware that closes errors with crucial details needed during development
 
-- returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown
-```
-ackRouters.consoleNonProductionErrors(options)
-```
+##### .htmlCloseError(options)
+Returns universal error handler middleware
 
-- returns middleware that upgrades a url variable into an Authorization header
-```
-ackRouters.urlVarAsAuthHeader(varName)
-```
+- **options** {debug:true/false, debugLocalNetwork:true}
 
-- returns middleware that upgrades a cookie variable into an Authorization header
-```
-ackRouters.cookieAsAuthHeader(varName)
-```
 
-- returns middleware that handles the processing of JWT
-> @options - {
->   requestKeyName: 'auth'//where parsed data will live (aka as requestProperty)
-> }
+##### .jsonCloseError(options)
+returns middleware that handles errors with JSON style details
 
-```
-ackRouters.jwt(secret,options)
-```
+- **options** {debug:true/false, debugLocalNetwork:true}
 
-- returns middleware that makes server logging colorful and useful
-> request-end result logging. see npm morgan
-> default dev format: 'dev' aka ':method :url :status :res[content-length] - :response-time ms'
-> default pro format: ':http-version/:method :url-short :colored-status :res[content-length] - :response-time ms :remote-addr :remote-user'
-> format url-short is a custom morgan.token()
-> format colored-status is a custom morgan.token()
+##### .closeProductionErrors()
+returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown
 
-```
-ackRouters.logging(format,options)
-```
+##### .consoleNonProductionErrors(options)
+returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown
 
-- returns middleware that uploads files. Creates req.files array
-> @options - see function paramUploadOptions
+##### .urlVarAsAuthHeader(varName)
+returns middleware that upgrades a url variable into an Authorization header
 
-```
-ackRouters.uploadByName(name, options)
-```
 
-- returns middleware that throws 405 errors on request
-```
-ackRouters.methodNotAllowed(message)
-```
+##### .cookieAsAuthHeader(varName)
+returns middleware that upgrades a cookie variable into an Authorization header
 
-- returns middleware that throws 400 errors on request
-```
-ackRouters.throw(ErrorOrMessage)
-```
+##### .jwt(secret,options)
+returns middleware that handles the processing of JWT
 
-- returns middleware that parses request bodies into request.body object
-    - options
-        - limit:102400
+- **options** {...}
+    - requestKeyName: 'auth'//where parsed data will live (aka as requestProperty)
+
+##### .logging(format,options)
+returns middleware that makes server logging colorful and useful. Request-end result logging. See npm morgan.
+
+- **format**
+    - default dev env format: 'dev' aka ':method :url :status :res[content-length] - :response-time ms'
+    - default pro env format: ':http-version/:method :url-short :colored-status :res[content-length] - :response-time ms :remote-addr :remote-user'
+    - "url-short" is a custom made morgan.token()
+    - "colored-status" is a custom made morgan.token()
+
+
+##### .uploadByName(name, options)
+returns middleware that uploads files. Creates req.files array
+
+- **options - see function paramUploadOptions
+
+##### .methodNotAllowed(message)
+returns middleware that throws 405 errors on request
+
+##### .throw(ErrorOrMessage)
+returns middleware that throws 400 errors on request
+
+##### .parseBody(options)
+returns middleware that parses request bodies into request.body object
+
+- **options**
+    - limit:102400
     - [see bodyParser for more](https://github.com/expressjs/body-parser)
-```
-ackRouters.parseBody(options)
-```
 
-
-- returns middleware that parse multi-part requests. Creates request.body which contains all form post fields
+##### .parseMultipartFields()
+returns middleware that parse multi-part requests. Creates request.body which contains all form post fields
 > NOTE: Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
 
-```
-ackRouters.parseMultipartFields()
-```
+##### .uploadOneByName(name, options)
+returns middleware that uploads only one file. Creates req[name] file
 
-- returns middleware that uploads only one file. Creates req[name] file
-> @options - see function paramUploadOptions
-> NOTES:
->   - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
->   - Any BODY/POST variables will be parsed and made available as req.body
+- **options** - see function paramUploadOptions
+    - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
+    - Any BODY/POST variables will be parsed and made available as req.body
 
-```
-ackRouters.uploadOneByName(name, options)
-```
+##### .uploadArrayByName(name, options)
+returns middleware that uploads an array of files. Creates req[name] array
 
-- returns middleware that uploads an array of files. Creates req[name] array
->  @options - see function paramUploadOptions
->  NOTES:
->  - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
->  - Any BODY/POST variables will be parsed and made available as req.body
+- **options** - see function paramUploadOptions
+    - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
+    - Any BODY/POST variables will be parsed and made available as req.body
 
-```
-ackRouters.uploadArrayByName(name, options)
-```
-
-- returns middleware that only allows local network requests
-```
-ackRouters.localNetworkOnly(message)
-```
+##### .localNetworkOnly(message)
+returns middleware that only allows local network requests

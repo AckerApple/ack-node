@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.26] - 2016-11-18
+### Added
+- add message argument to routers().notFound(msg)
+
 ## [1.0.25] - 2016-11-17
 ### Added
 - reqres.res.sendJSON now has second parameter to allow pretty JSON

@@ -21,8 +21,10 @@ ack.modules.definePath('scheduler', path.join(modulesPath,'scheduler.js'))
 ack.modules.definePath('reqres', path.join(modulesPath,'reqres.js'))
 ack.modules.definePath('req', path.join(modulesPath,'req.js'))
 
+/** offers functionality for rendering pug/jade like templates string */
 ack.modules.definePath('templating', path.join(modulesPath,'templating.js'))
-/** renders and returns jade string */
+
+/** one time quic qay to render file-by-path and returns jade string */
 ack.modules.define('template', function(filePath, locals){
 	return ack.templating(filePath).render(locals)
 })
