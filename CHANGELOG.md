@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.27] - 2016-11-21
+### Enhanced
+- cors now allows all known safe headers by default
+
 ## [1.0.26] - 2016-11-18
 ### Added
 - add message argument to routers().notFound(msg)

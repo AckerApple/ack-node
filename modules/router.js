@@ -10,8 +10,10 @@ var ack = require('../index.js'),
 		connectTimeout = require("connect-timeout"),
 		compression = require('compression')
 
-
+var safeHeaders = ["Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Cache-Control", "Connection", "Content-Disposition", "Content-Encoding", "Content-Length", "Content-Type", "Cookie", "DNT", "Date", "Expires", "HTTP_CLIENT_IP", "HTTP_COMING_FROM", "HTTP_VIA", "Host", "If-Modified-Since", "Keep-Alive", "Origin", "Pragma", "REMOTE_ADDR", "Referer", "Server", "Set-Cookie", "Srv", "Transfer-Encoding", "User-Agent", "Vary", "X-Content-Type-Options", "X-CustomHeader", "X-DNS-Prefetch-Control", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Server", "X-Frame-Options", "X-Modified", "X-OTHER", "X-Originating-IP", "X-Output", "X-PING", "X-PINGOTHER", "X-Powered-By", "X-Real-IP", "X-Redirect", "X-Requested-With", "X-Robots-Tag", "X-XSS-Protection", "X-Xss-Protection"]
 var isProNode = process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase()==='PRODUCTION'
+
+module.exports.safeHeaders = safeHeaders
 
 /** returns middleware that sets cache-control header for every request */
 module.exports.cacheFor = function(seconds){
@@ -77,14 +79,15 @@ module.exports.compress = function(options){
 	@options{
 		origin:'*',
 		maxAge: 3000//Access-Control-Allow-Max-Age CORS header default 50 minutes
+		exposedHeaders:module.exports.safeHeaders//headers server is allowed to send
+		allowedHeaders:module.exports.safeHeaders//headers server is allowed to receive
 	}
 */
 module.exports.cors = function(options){
 	options = options || {}
-	
-	//prevent subsequent OPTIONS requests
-	options.maxAge = options.maxAge==null ? 3000 : options.maxAge
-
+	options.maxAge = options.maxAge==null ? 3000 : options.maxAge//prevent subsequent OPTIONS requests via cache
+	options.exposedHeaders=options.exposedHeaders||safeHeaders
+	options.allowedHeaders=options.allowedHeaders||safeHeaders
 	return cors(options)
 }
 
