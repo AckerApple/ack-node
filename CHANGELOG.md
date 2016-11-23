@@ -1,6 +1,12 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.28] - 2016-11-22
+### Updated
+- jsonwebtoken from 7.0.1 to 7.1.9
+### Added
+- uploadOneByNameToPath
+
 ## [1.0.27] - 2016-11-21
 ### Enhanced
 - cors now allows all known safe headers by default

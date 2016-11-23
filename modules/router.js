@@ -319,7 +319,9 @@ module.exports.parseBody = function(options){
 	    promise = promise.then( ack ).call('nullsToEmptyString')
 	  }
 
-	  promise.return().then(next).catch(next)
+	  if(next)promise.return().then(next).catch(next)
+
+	  return promise
 	}
 }
 
@@ -354,7 +356,40 @@ module.exports.parseMultipartFields = function(){
 */
 module.exports.uploadOneByName = function(name, options){
 	options = paramUploadOptions(options)
-	return multer(options).single(name)
+	const uploader = multer(options).single(name)
+
+	return function(req,res,next){
+		var promise = ack.promise()
+		.callback(function(callback){
+			uploader(req,res,callback)
+		})
+		
+		if(next)promise = promise.then(next).catch(next)
+
+		return promise
+	}
+}
+
+module.exports.uploadOneByNameToPath = function(name, path, options){
+	options = paramUploadOptions(options)
+	var isLikeFile = ack.path(path).isLikeFile()
+
+	return function(req,res,next){
+		var promise = module.exports.uploadOneByName(name,options)(req,res)
+		.then(function(){
+			const ackPath = ack.path(path)
+						
+			if(!isLikeFile){
+				ackPath.join(req[name].originalname)
+			}
+			
+			return ackPath.writeFile(req[name].buffer)
+		})
+		
+		if(next)promise = promise.then(next).catch(next)
+
+		return promise
+	}
 }
 
 /** returns middleware that uploads an array of files. Creates req[name] array

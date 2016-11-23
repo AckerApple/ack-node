@@ -1,6 +1,7 @@
 "use strict";
 var	ack = require('../index.js'),
 	request = require('request'),//required to make outbound requests
+	fs = require('fs'),
 	querystring = require('querystring'),//used to turn js object to post form variables for outbound requests
 	url = require('url')
 	//,http = require('http')
@@ -47,8 +48,25 @@ req.prototype.header = function(nameOrStruct, value){
 	return this
 }
 
+/** adds form post variables
+	TODO: convert into POST trigger instead of variable catcher
+*/
 req.prototype.post = function(nameOrStruct, value){
 	this.posts.set.apply(this.posts,arguments)
+	return this
+}
+
+req.prototype.addFile = function(name, file){
+	this.options.data = this.options.data || {}
+	this.options.data.formData = this.options.data.formData || {}
+	this.options.data.formData[name] = file
+	return this
+}
+
+req.prototype.addFileByPath = function(name, path){
+	this.options.data = this.options.data || {}
+	this.options.data.formData = this.options.data.formData || {}
+	this.options.data.formData[name] = fs.createReadStream(path)
 	return this
 }
 
@@ -85,10 +103,12 @@ req.prototype.getTransmissionOptions = function(){
 		if(this.jsonArray.length > 1){
 			ops.multipart = ops.multipart || []
 			for(var jIndex=0; jIndex < this.jsonArray.length; ++jIndex){
+				var body = JSON.stringify( this.jsonArray[jIndex] )
 				ops.multipart.push({
 					accept: 'application/json',
 					'Content-Type':'application/json',
-					body : JSON.stringify( this.jsonArray[jIndex] )
+					'Content-Length':body.length,
+					body : body
 				})
 			}
 		}else{
@@ -107,11 +127,17 @@ req.prototype.getTransmissionOptions = function(){
 	if(Object.keys(this.posts.data).length){
 		ops.url = ops.uri//? this maybe just to report back to user the url ? Seems in the wrong place. Perhaps this is actually needed by request.post() ? (8/25/15)
 		ops.form = this.posts.data
+		//ops.formData = this.posts.data
 	}
 
 	ops.method = ops.method || (Object.keys(this.posts.data).length ? 'post' : 'get')
 
 	return ops;
+}
+
+req.prototype.method = function(method){
+	this.options.data.method = method
+	return this
 }
 
 req.prototype.delete = function(address){
