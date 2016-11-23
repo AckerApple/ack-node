@@ -349,6 +349,7 @@ module.exports.parseMultipartFields = function(){
 }
 
 /** returns middleware that uploads only one file. Creates req[name] file
+	@name - input file field name expected to receive file on
 	@options - see function paramUploadOptions
 	NOTES:
 		- Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
@@ -370,6 +371,14 @@ module.exports.uploadOneByName = function(name, options){
 	}
 }
 
+/** for more information see uploadOneByName
+	@name - input file field name expected to receive file on
+	@path - exact file path or if folder path, then file upload name will be used
+	@options - see function paramUploadOptions
+	NOTES:
+		- Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
+		- Any BODY/POST variables will be parsed and made available as req.body
+*/
 module.exports.uploadOneByNameToPath = function(name, path, options){
 	options = paramUploadOptions(options)
 	var isLikeFile = ack.path(path).isLikeFile()

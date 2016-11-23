@@ -6,7 +6,7 @@ var ack = require('ack-x'),
 
 /* practically direct package access */
 	ack.modules.definePath('crypto', path.join(modulesPath,'crypto.js'))
-	ack.modules.definePath('jade', path.join(modulesPath,'jade.js'))
+	//ack.modules.definePath('jade', path.join(modulesPath,'jade.js'))
 /* end */
 
 ack.modules.definePath('ip', path.join(modulesPath,'ip.js'))

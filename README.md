@@ -165,6 +165,7 @@ app.get('/', ackRouters.ignoreFavors(), ackRouters.timeout(3000), ackRouters.com
 - [.parseBody(options)](#parsebody)
 - [.parseMultipartFields()](#parsemultipartfields)
 - [.uploadOneByName(name, options)](#uploadonebynamename-options)
+- [.uploadOneByNameToPath(name, path, options)](#uploadonebynametopathname-options)
 - [.uploadArrayByName(name, options)](#uploadarraybynamename-options)
 - [.localNetworkOnly(message)](#localnetworkonlymessage)
 
@@ -266,6 +267,18 @@ returns middleware that uploads only one file. Creates req[name] file
 - **options** - see function paramUploadOptions
     - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
     - Any BODY/POST variables will be parsed and made available as req.body
+
+##### .uploadOneByNameToPath(name, path, options)
+
+for more information see uploadOneByName
+
+- **name** - input file field name expected to receive file on
+- **path** - exact file path or if folder path, then file upload name will be used
+- **options** - see function paramUploadOptions
+
+> NOTES:
+> - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
+> - Any BODY/POST variables will be parsed and made available as req.body
 
 ##### .uploadArrayByName(name, options)
 returns middleware that uploads an array of files. Creates req[name] array

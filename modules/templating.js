@@ -1,5 +1,5 @@
 "use strict";
-var	jade = require('jade')
+var	jade = require('pug')
 
 function templating(filePathOrOptions){
 	switch(typeof filePathOrOptions){

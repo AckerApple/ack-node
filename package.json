@@ -1,6 +1,6 @@
 {
   "name": "ack-node",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/AckerApple/ack-node#readme",
   "dependencies": {
-    "ack-path": "^1.1.0",
+    "ack-path": "^1.2.0",
     "ack-x": "^1.2.5",
     "body-parser": "^1.15.1",
     "compression": "^1.6.2",
@@ -34,7 +34,6 @@
     "cors": "^2.7.1",
     "crypto-js": "^3.1.6",
     "etag": "^1.7.0",
-    "jade": "^1.11.0",
     "jsonwebtoken": "^7.1.9",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
@@ -42,6 +41,7 @@
     "node-schedule": "^1.1.0",
     "nodedump": "^0.0.8",
     "nodemailer": "^2.4.2",
+    "pug": "^2.0.0-beta6",
     "request": "^2.72.0",
     "ua-parser-js": "^0.7.10"
   },
