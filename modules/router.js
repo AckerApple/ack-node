@@ -519,7 +519,7 @@ function htmlCloseError(options){
 		res.statusCode = err.status || err.statusCode || 500
 		res.statusMessage = msg
 		res.setHeader('Content-Type','text/html')
-		res.setHeader('message', msg)
+		if(msg)res.setHeader('message', msg)
 		var output = '<h3>'+msg+'</h3>'//message meat
     var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
 

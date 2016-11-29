@@ -145,6 +145,7 @@ reqres.prototype.sendFileByPath = function(path, mimeType){
     this.res.statusCode = 200
     this.res.setHeader('Content-Length', stats.size)
     this.res.setHeader('Content-Type', mimeType)
+    this.res.setHeader('Content-Disposition','filename="'+jFile.getName()+'"')
     return path
   })
   .then(fs.createReadStream)

@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.30] - 2016-11-29
+### Fixed
+- router to send error message header fixed
+
 ## [1.0.29] - 2016-11-23
 ### Changed
 - replaced jade with pug
