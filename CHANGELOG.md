@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.31] - 2016-12-01
+### Updated
+- ack.path from 1.2.1 to 1.3.0
+
 ## [1.0.30] - 2016-11-29
 ### Fixed
 - router to send error message header fixed
