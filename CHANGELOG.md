@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.0.32] - 2016-12-14
+### Enhanced
+- ack.routers().respond() now accepts a function
+
 ## [1.0.31] - 2016-12-01
 ### Updated
 - ack.path from 1.2.1 to 1.3.0
