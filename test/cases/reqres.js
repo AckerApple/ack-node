@@ -128,12 +128,7 @@ describe('reqres',function(){
 				reqres = ack.reqres(req,res)
 
 				if(reqres.path().string=='/etag-test'){
-
-try{
 					return reqres.etag({test:22})
-}catch(e){
-	console.log(e)
-}
 				}
 
 				reqres.req.input().parseFormVars().then(closeReqRes)
@@ -150,7 +145,7 @@ try{
 		})
 
 		it('post',function(done){
-			ack.req().post({testVar:22}).send('localhost:3001')
+			ack.req().postVar({testVar:22}).send('localhost:3001')
 			.then(function(body,response){
 				body = JSON.parse(body)
 				assert.equal(body.isMultipart, false)

@@ -1,6 +1,13 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.1.0] - 2016-12-20
+### Added
+- ack().req().postVar() to set post form variables
+### Breaking Change
+- ack().req().post() is now to send a post body
+  - ack().req().postVar()
+
 ## [1.0.32] - 2016-12-14
 ### Enhanced
 - ack.routers().respond() now accepts a function

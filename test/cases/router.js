@@ -38,11 +38,8 @@ describe('router',function(){
 
     it('success',done=>{
       var bodyPost = {testVar:22}
-      ack.req().post(bodyPost).send('localhost:3003/success-test')
-      .then((body, res)=>{
-        var mirror = JSON.parse(body)
-        assert.equal(bodyPost.testVar, mirror.body.testVar)
-      })
+      ack.req().post('localhost:3003/success-test',bodyPost)
+      .then(body=>assert.equal(bodyPost.testVar, body.body.testVar))
       .then(done).catch(done)
     })
 

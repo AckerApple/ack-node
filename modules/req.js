@@ -20,7 +20,7 @@ var req = function($scope){
 	this.posts = ack.accessors()
 	this.cookies = ack.accessors()
 	this.headers = ack.accessors()
-	this.vars = ack.accessors()
+	this.vars = ack.accessors()//url query variables
 	return this
 }
 
@@ -48,13 +48,17 @@ req.prototype.header = function(nameOrStruct, value){
 	return this
 }
 
-/** adds form post variables
-	TODO: convert into POST trigger instead of variable catcher
-*/
-req.prototype.post = function(nameOrStruct, value){
+/** adds form post variables */
+req.prototype.postVar = function(nameOrStruct, value){
 	this.posts.set.apply(this.posts,arguments)
 	return this
 }
+
+/** adds form post variables
+	DEPRECATED: this should trigger a send
+	TODO: convert into POST trigger instead of variable catcher
+*/
+//req.prototype.post = req.prototype.postVar
 
 req.prototype.addFile = function(name, file){
 	this.options.data = this.options.data || {}
@@ -75,6 +79,7 @@ req.prototype.json = function(value){
 	return this
 }
 
+/** add query var */
 req.prototype.var = function(nameOrStruct,value){
 	this.vars.set.apply(this.vars,arguments)
 	return this
@@ -140,11 +145,31 @@ req.prototype.method = function(method){
 	return this
 }
 
+/** triggers request to send with method delete */
 req.prototype.delete = function(address){
 	this.options.data.method = 'del';
 	return this.send(address)
 }
 
+/** triggers request to send with method post */
+req.prototype.post = function(dataOrAddress, data){
+	this.options.data.method = 'post';
+
+	if(dataOrAddress && dataOrAddress.constructor == String){
+		if(data){
+			this.json(data)
+		}
+		return this.send(dataOrAddress)
+	}
+
+	if(data){
+		this.json(data)
+	}
+
+	return this.send()
+}
+
+/** triggers request to send with method put */
 req.prototype.put = function(dataOrAddress, data){
 	this.options.data.method = 'put';
 
@@ -162,6 +187,7 @@ req.prototype.put = function(dataOrAddress, data){
 	return this.send()
 }
 
+/** triggers request to send */
 req.prototype.send = function(address, options){
 	var req,
 		ops = this.getTransmissionOptions(),
@@ -178,7 +204,7 @@ req.prototype.send = function(address, options){
 
 	return ack.promise().bind(this)
 	.callback(function(callback){
-		req = request[ops.method](ops, callback)
+		req = request[ops.method.toLowerCase()](ops, callback)
 	})
 	.then(function(response, body){
 		if(orgUrl){
