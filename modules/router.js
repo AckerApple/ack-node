@@ -133,6 +133,25 @@ module.exports.ignoreFavors = function(statusCode){
 }
 module.exports.ignoreFavIcon = module.exports.ignoreFavors
 
+/** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors
+	@options{
+		array:[],
+		maxLength:25
+	}
+*/
+module.exports.errorsToArray = function(options){
+	options = options || {}
+	options.array = options.array || []
+	options.maxLength = options.maxLength || 25
+	return function(err, req, res, next){
+		options.array.push(err)
+		if(options.array.length>options.maxLength){
+			options.array.pop()
+		}
+		if(next)next(err)
+	}
+}
+
 /** returns middleware that closes errors with crucial details needed during development  */
 module.exports.closeDevErrors = function(){
 	return function(err, req, res, next){
@@ -143,6 +162,8 @@ module.exports.closeDevErrors = function(){
 		}else{
 			jsonCloseError({debug:true})(err,req,res)
 		}
+
+		if(next)next(err)
 	}
 }
 

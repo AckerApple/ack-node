@@ -10,6 +10,18 @@ describe('router',function(){
 		ack.router()
 	})
 
+  it('#errorsToArray',()=>{
+    const options = {array:[]}
+    const router = ack.router().errorsToArray(options)
+    router(new Error('request error'), {}, {}, ()=>0)
+    assert.equal(options.array.length, 1)
+    const loopArray = new Array(65)//65 errors will occur but only 25 should exist
+    for(let x=loopArray.length-1; x >= 0; --x){
+      router(new Error('request error'), {}, {}, ()=>x)
+    }
+    assert.equal(options.array.length, 25)
+  })
+
   describe('body-parsing',function(){
     var server
 
