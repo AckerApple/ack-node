@@ -159,6 +159,7 @@ app.get('/', ackRouters.ignoreFavors(), ackRouters.timeout(3000), ackRouters.com
 - [.cookieAsAuthHeader(varName)](#cookieasauthheadervarname)
 - [.jwt(secret,options)](#jwtsecretoptions)
 - [.logging(format,options)](#loggingformatoptions)
+- [.errorsToArray(options)](#errorstoarrayoptions)
 - [.uploadByName(name, options)](#uploadbynamename-options)
 - [.methodNotAllowed(message)](#methodnotallowedmessage)
 - [.throw(ErrorOrMessage)](#throwerrorormessage)
@@ -238,6 +239,12 @@ returns middleware that makes server logging colorful and useful. Request-end re
     - "url-short" is a custom made morgan.token()
     - "colored-status" is a custom made morgan.token()
 
+##### .errorsToArray(options)
+returns middleware the records errors to an array of specified maxLength
+
+- **options**
+    - array:[]
+    - maxLength:25
 
 ##### .uploadByName(name, options)
 returns middleware that uploads files. Creates req.files array
