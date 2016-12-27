@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.1.2] - 2016-12-27
+### Added
+- ack.router().logToArray(options)
+
 ## [1.1.1] - 2016-12-26
 ### Added
 - ack.router().errorsToArray(options)

@@ -133,7 +133,7 @@ module.exports.ignoreFavors = function(statusCode){
 }
 module.exports.ignoreFavIcon = module.exports.ignoreFavors
 
-/** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors
+/** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors. Params datetime key of errors.
 	@options{
 		array:[],
 		maxLength:25
@@ -144,10 +144,8 @@ module.exports.errorsToArray = function(options){
 	options.array = options.array || []
 	options.maxLength = options.maxLength || 25
 	return function(err, req, res, next){
-		options.array.push(err)
-		if(options.array.length>options.maxLength){
-			options.array.pop()
-		}
+    err.datetime = err.datetime || new Date()
+		maxArrayPush(options.array,err,options.maxLength)
 		if(next)next(err)
 	}
 }
@@ -288,12 +286,39 @@ module.exports.jwt = function(secret,options){
 	}
 */
 module.exports.logging = function(format,options){
-	if(!format){
-		var pro = ':colored-status :url-short :colored-method :res[content-length] :response-time ms :remote-addr :remote-user :device-name :browser-name'
-		format = isProNode?pro:pro//'dev';
-	}
+	format = format || getMorganDefaultFormat(options)
 
 	return morgan(format,options)
+}
+
+function getMorganDefaultFormat(options,add){
+	const status = options.stream ? ':status' : ':colored-status'
+	const method = options.stream ? ':method' : ':colored-method'
+	let rtn = status+' :url-short '+method+' :res[content-length] :response-time ms :remote-addr :remote-user :device-name :browser-name'
+	if(add){
+		rtn += ' '+add
+	}
+	return rtn
+}
+
+/** uses logging(format,options) to build an array of string, with a specific maxLength, that record requests
+	@options{
+		array:[],
+		maxLength:100
+	}
+*/
+module.exports.logToArray = function(options){
+	options = Object.assign({}, options)//clone n param ops
+	var array = options.array || []
+	delete options.array
+	var maxLength = options.maxLength || 100
+	options.stream = {
+		write:function(log){
+			maxArrayPush(array, log.substring(0, log.length-1), maxLength)
+		}
+	}
+	var format = options.format || getMorganDefaultFormat(options,'[:date[web]]')
+	return module.exports.logging(format,options)
 }
 
 /** returns middleware that uploads files. Creates req.files array
@@ -626,4 +651,14 @@ function jsonCloseError(options){
 	    }
 	  }
 	}
+}
+
+
+
+
+const maxArrayPush = function(array, push, max){
+	if(max && array.length >= max){
+		array.pop()
+	}
+	return array.push(push)
 }

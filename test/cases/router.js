@@ -23,13 +23,18 @@ describe('router',function(){
   })
 
   describe('body-parsing',function(){
-    var server
+    var server, logArray, logger
 
     beforeEach(function(done){
+      logArray = []
+      logger = ack.router().logToArray({array:logArray, maxLength:5})
+      
       var onRequest = function(req,res){
         var next = function(err){
           ack.reqres(req,res).sendJSON({body:req.body})
         }
+
+        logger(req,res,()=>{})
 
         if(req.url.search(/\/upload-package-directly/)>=0){
           var uploadPath = uploadPackPath
@@ -52,6 +57,30 @@ describe('router',function(){
       var bodyPost = {testVar:22}
       ack.req().post('localhost:3003/success-test',bodyPost)
       .then(body=>assert.equal(bodyPost.testVar, body.body.testVar))
+      .then(done).catch(done)
+    })
+
+    it('logArray',done=>{
+      var bodyPost = {testVar:22}
+      ack.req().post('localhost:3003/success-test',bodyPost)
+      .then(body=>{
+        assert.equal(logArray.length, 1)
+
+        let x=20
+        const promises = []
+
+        while(x>0){
+          promises.push( ack.req().post('localhost:3003/success-test',bodyPost) )
+          //console.log(x)
+          --x
+        }
+        
+        return ack.promise().all(promises)
+      })
+      .then(()=>{
+        assert.equal(logArray.length, 5)//even though we made 25 requests, only 5 should be in array log
+        console.log('logArray',logArray)
+      })
       .then(done).catch(done)
     })
 
