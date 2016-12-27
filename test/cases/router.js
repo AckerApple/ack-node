@@ -79,7 +79,6 @@ describe('router',function(){
       })
       .then(()=>{
         assert.equal(logArray.length, 5)//even though we made 25 requests, only 5 should be in array log
-        console.log('logArray',logArray)
       })
       .then(done).catch(done)
     })
