@@ -145,7 +145,7 @@ module.exports.errorsToArray = function(options){
 	options.maxLength = options.maxLength || 25
 	return function(err, req, res, next){
     err.datetime = err.datetime || new Date()
-		maxArrayPush(options.array,err,options.maxLength)
+		maxArrayUnshift(options.array,err,options.maxLength)
 		if(next)next(err)
 	}
 }
@@ -314,7 +314,7 @@ module.exports.logToArray = function(options){
 	var maxLength = options.maxLength || 100
 	options.stream = {
 		write:function(log){
-			maxArrayPush(array, log.substring(0, log.length-1), maxLength)
+			maxArrayUnshift(array, log.substring(0, log.length-1), maxLength)
 		}
 	}
 	var format = options.format || getMorganDefaultFormat(options,'[:date[web]]')
@@ -656,9 +656,16 @@ function jsonCloseError(options){
 
 
 
-const maxArrayPush = function(array, push, max){
+function maxArrayPush(array, item, max){
+	if(max && array.length >= max){
+		array.shift()
+	}
+	return array.push(item)
+}
+
+function maxArrayUnshift(array, item, max){
 	if(max && array.length >= max){
 		array.pop()
 	}
-	return array.push(push)
+	return array.unshift(item)
 }
