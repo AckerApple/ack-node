@@ -240,6 +240,7 @@ req.prototype.preSendOps = function(ops){
 }
 
 req.prototype.procresreq = function(res, req, body){
+	//add convenience method that parses cookies
 	res.getCookieObject = function(){
 		if(!this.headers || !this.headers['set-cookie'])return {}
 		var data={}, rows=this.headers['set-cookie']

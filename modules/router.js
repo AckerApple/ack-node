@@ -134,23 +134,38 @@ module.exports.ignoreFavors = function(statusCode){
 module.exports.ignoreFavIcon = module.exports.ignoreFavors
 
 /** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors. Params datetime key of errors.
-	@options{
-		array:[],
-		maxLength:25
-	}
+  @options{
+    array:[],
+    maxLength:25
+  }
 */
 module.exports.errorsToArray = function(options){
-	options = options || {}
-	options.array = options.array || []
-	options.maxLength = options.maxLength || 25
-	return function(err, req, res, next){
-    err.datetime = err.datetime || new Date()
-		maxArrayUnshift(options.array,err,options.maxLength)
-		if(next)next(err)
-	}
+  options = options || {}
+  options.array = options.array || []
+  options.maxLength = options.maxLength || 25
+  return function(err, req, res, next){
+    var recErr = Object.assign({}, err)
+    
+    //capture hidden error properties
+    const keys = Object.getOwnPropertyNames(err)
+    keys.forEach(key=>{
+      recErr[key] = err[key]
+    })
+
+    //add timestamp
+    recErr.datetime = recErr.datetime || new Date()
+
+    //todo: record IP address error occurred on. Record url-path, method, device-name, browser-name.
+    //todo: add options to enable/disable error details
+
+    maxArrayUnshift(options.array, recErr, options.maxLength)
+    if(next)next(err)
+  }
 }
 
-/** returns middleware that closes errors with crucial details needed during development  */
+/** returns middleware that closes errors with crucial details needed during development
+		hint: must be last middleware AFTER routes that MAY have an error
+*/
 module.exports.closeDevErrors = function(){
 	return function(err, req, res, next){
 		var isHtml = ack.reqres(req,res).isHtml()
@@ -165,7 +180,9 @@ module.exports.closeDevErrors = function(){
 	}
 }
 
-/** returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown */
+/** returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown
+		hint: must be last middleware AFTER routes that MAY have an error
+*/
 module.exports.closeProductionErrors = function(){
 	return function processError(err, req, res, next){
 		try{
@@ -189,7 +206,9 @@ module.exports.closeProductionErrors = function(){
 	}
 }
 
-/** returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown */
+/** returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown
+		hint: must be last middleware AFTER routes that MAY have an error
+*/
 module.exports.consoleNonProductionErrors = function(options){
 	if(isProNode){
 		return function(req,res,next){
