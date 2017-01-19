@@ -134,15 +134,14 @@ reqrtn.prototype.relativePath = function(){
 	return this.Path().relative
 }
 
-/** options={isHttps:true|false} */
-reqrtn.prototype.absoluteUrl = function(options){
+/** http://domain.com:80 */
+reqrtn.prototype.getHostUrl = function(options){
 	options = options || {}
 	var protocol = 'http'
 	var isHttps = options.isHttps || this.isHttps()
 	if(isHttps){
 		protocol += 's';
 	}
-	var relPath = this.req.originalUrl || this.req.url || ''
 
 	var port = ''
 	if(options.port){
@@ -154,7 +153,16 @@ reqrtn.prototype.absoluteUrl = function(options){
 		}
 	}
 
-	var abUrl = protocol + '://' + this.getHostName() + port + relPath
+	return protocol + '://' + this.getHostName() + port
+}
+
+/** http://domain.com:80/path
+	@options={isHttps:true|false}
+*/
+reqrtn.prototype.absoluteUrl = function(options){
+	var relPath = this.req.originalUrl || this.req.url || ''
+
+	var abUrl = this.getHostUrl(options) + relPath
 	return abUrl
 }
 
