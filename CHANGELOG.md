@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.1.6] - 2017-01-19
+### Enhanced
+- ack.router().errorsToArray() properly converts strings to errors
+
 ## [1.1.5] - 2017-01-04
 ### Enhanced
 - ack.router().errorsToArray() now makes hidden error details visible

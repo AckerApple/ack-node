@@ -144,6 +144,10 @@ module.exports.errorsToArray = function(options){
   options.array = options.array || []
   options.maxLength = options.maxLength || 25
   return function(err, req, res, next){
+  	if(err.constructor==String){
+  		err = {message:err}
+  	}
+    
     var recErr = Object.assign({}, err)
     
     //capture hidden error properties
@@ -154,6 +158,7 @@ module.exports.errorsToArray = function(options){
 
     //add timestamp
     recErr.datetime = recErr.datetime || new Date()
+    recErr.serverDatetime = recErr.serverDatetime || ack.date().now().mmddyyyyhhmmtt()
 
     //todo: record IP address error occurred on. Record url-path, method, device-name, browser-name.
     //todo: add options to enable/disable error details
