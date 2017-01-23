@@ -659,8 +659,11 @@ function jsonCloseError(options){
 			var statusMessage = err.message || err.code
 			var statusCode = err.status || err.statusCode || 500
 
-			res.statusMessage = statusMessage.toString().replace(/[^0-9a-z]/ig,'')//.replace(/[`$;|&\\]/g,'_')
-			res.statusCode = statusCode.toString().replace(/[^0-9]/g,'')
+			statusMessage = statusMessage.toString().replace(/[`$;|&\\]/g,'_')//.replace(/[^0-9a-z]/ig,'')//
+			statusCode = statusCode.toString().replace(/[^0-9]/g,'')
+
+			res.statusMessage = statusMessage
+			res.statusCode = statusCode
 
 	    var rtn = {
 	      error: {
