@@ -659,7 +659,7 @@ function jsonCloseError(options){
 			var statusMessage = err.message || err.code
 			var statusCode = err.status || err.statusCode || 500
 
-			res.statusMessage = statusMessage.toString().replace(/[`$;|&\\]/g,'_')
+			res.statusMessage = statusMessage.toString().replace(/[^0-9a-z]/ig,'')//.replace(/[`$;|&\\]/g,'_')
 			res.statusCode = statusCode.toString().replace(/[^0-9]/g,'')
 
 	    var rtn = {
@@ -676,7 +676,7 @@ function jsonCloseError(options){
 	    if(isDebug){
 	      rtn.error.stack = err.stack//debug requests will get stack traces
 	    }
-
+/*
 	    if(res.json){
 	    	res.json(rtn)
 	    }else{
@@ -686,18 +686,17 @@ function jsonCloseError(options){
 				res.setHeader('Content-Length', output.length.toString())
 		    res.end( output );
 	    }
+*/
 
-/*
 			var output = JSON.stringify(rtn)
 			res.setHeader('message', statusMessage)
 			res.setHeader('Content-Type','application/json')
 			res.setHeader('Content-Length', output.length.toString())
 	    res.end( output );
-*/
 	  }catch(e){
 	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
 	    console.error(e)
-	    console.error('------ original error ------')
+	    console.error('------ original error ------', statusMessage)
 	    console.error(err)
 
 	    if(next){
