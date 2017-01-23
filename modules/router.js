@@ -648,18 +648,24 @@ function htmlCloseError(options){
 /** returns middleware that handles errors with JSON style details
 	@options {debug:true/false, debugLocalNetwork:true}
 */
+/** returns middleware that handles errors with JSON style details
+	@options {debug:true/false, debugLocalNetwork:true}
+*/
 function jsonCloseError(options){
 	options = options || {}
 	options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
 	return function(err, req, res, next){
 	  try{
-			var msg = err.message || err.code
-			res.statusCode = err.status || err.statusCode || 500
-			res.statusMessage = msg
+			var statusMessage = err.message || err.code
+			var statusCode = err.status || err.statusCode || 500
+			res.statusMessage = statusMessage
+
+			res.statusMessage = statusMessage//.replace(/[`|$|;|\||&|\\]/g,'_')
+			res.statusCode = statusCode.toString().replace(/[^0-9]/g,'')
 
 	    var rtn = {
 	      error: {
-	        message: msg.toString(),
+	        message: statusMessage.toString(),
 	        code: res.statusCode,
 					"debug": {
 						"stack": err.stack
@@ -672,6 +678,7 @@ function jsonCloseError(options){
 	      rtn.error.stack = err.stack//debug requests will get stack traces
 	    }
 
+	    /*
 	    if(res.json){
 	    	res.json(rtn)
 	    }else{
@@ -681,6 +688,13 @@ function jsonCloseError(options){
 				res.setHeader('Content-Length', output.length)
 		    res.end( output );
 	    }
+	    */
+
+			var output = JSON.stringify(rtn)
+			res.setHeader('message', rtn.error.message)
+			res.setHeader('Content-Type','application/json')
+			res.setHeader('Content-Length', output.length)
+	    res.end( output );
 	  }catch(e){
 	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
 	    console.error(e)
