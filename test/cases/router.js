@@ -20,6 +20,9 @@ describe('router',function(){
       router(new Error('request error'), {}, {}, ()=>x)
     }
     assert.equal(options.array.length, 25)
+    assert.equal(options.array[0].datetime.constructor, Date)
+    assert.equal(options.array[0].server.constructor, Object)
+    assert.equal(options.array[0].server.datetime.constructor, String)
   })
 
   describe('body-parsing',function(){

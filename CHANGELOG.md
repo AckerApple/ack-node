@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.1.8] - 2017-01-23
+### Enhanced
+- ack.router().errorsToArray() now adds server key to error object with request headers
+
 ## [1.1.6] - 2017-01-19
 ### Enhanced
 - ack.router().errorsToArray() properly converts strings to errors

@@ -158,7 +158,14 @@ module.exports.errorsToArray = function(options){
 
     //add timestamp
     recErr.datetime = recErr.datetime || new Date()
-    recErr.serverDatetime = recErr.serverDatetime || ack.date().now().mmddyyyyhhmmtt()
+    
+    //special server variables
+    recErr.server = {
+    	datetime:ack.date().now().mmddyyyyhhmmtt(),
+    	req:{
+    		headers:req.headers
+    	}
+    }
 
     //todo: record IP address error occurred on. Record url-path, method, device-name, browser-name.
     //todo: add options to enable/disable error details
