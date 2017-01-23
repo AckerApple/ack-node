@@ -10,14 +10,30 @@ describe('router',function(){
 		ack.router()
 	})
 
-  it('#errorsToArray',()=>{
+  it.only('#errorsToArray',()=>{
     const options = {array:[]}
     const router = ack.router().errorsToArray(options)
-    router(new Error('request error'), {}, {}, ()=>0)
+    const fakeReq = {
+      method:"GET",
+      query:{test:true},
+      connection:{
+        remoteAddress:"127.0.0.1",
+        encrypted:false
+      },
+      socket:{
+        server:{
+          _connectionKey:"localhost:80"
+        }
+      },
+      headers:{
+        host:'localhost'
+      }
+    }
+    router(new Error('request error'), fakeReq, {}, ()=>0)
     assert.equal(options.array.length, 1)
     const loopArray = new Array(65)//65 errors will occur but only 25 should exist
     for(let x=loopArray.length-1; x >= 0; --x){
-      router(new Error('request error'), {}, {}, ()=>x)
+      router(new Error('request error'), fakeReq, {}, ()=>x)
     }
     assert.equal(options.array.length, 25)
     assert.equal(options.array[0].datetime.constructor, Date)

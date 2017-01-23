@@ -36,6 +36,9 @@ reqrtn.prototype.getPort = function(){
 	return cKey.split(':').pop()
 }
 
+/** will review all known places the ip of the request might be
+	@ip = set the ip address in all known places to store for a request
+*/
 reqrtn.prototype.ip = function(ip){
 	if(ip){
 		/* reset all known places the ip address might be stored */
@@ -65,6 +68,7 @@ reqrtn.prototype.ip = function(ip){
 			return this.req.connection.socket.remoteAddress
 		}
 	}
+
 	if(this.req.socket && this.req.socket.remoteAddress){
 		return this.req.socket.remoteAddress
 	}
@@ -173,7 +177,7 @@ reqrtn.prototype.getHostName = function(){
 	}
 
 	var host = this.getHost()
-	return host.split(':').shift()
+	return host ? host.split(':').shift() : null
 }
 reqrtn.prototype.hostName = reqrtn.prototype.getHostName//deprecated naming convention
 

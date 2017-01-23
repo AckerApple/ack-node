@@ -149,6 +149,7 @@ module.exports.errorsToArray = function(options){
   	}
     
     var recErr = Object.assign({}, err)
+    var reqres = ack.reqres(req,res)
     
     //capture hidden error properties
     const keys = Object.getOwnPropertyNames(err)
@@ -163,7 +164,12 @@ module.exports.errorsToArray = function(options){
     recErr.server = {
     	datetime:ack.date().now().mmddyyyyhhmmtt(),
     	req:{
-    		headers:req.headers
+    		ip      : reqres.ip(),
+    		method  : req.method,
+    		headers : req.headers,
+    		https   : reqres.req.isHttps(),
+    		url     : reqres.req.absoluteUrl(),
+    		query   : req.query
     	}
     }
 
