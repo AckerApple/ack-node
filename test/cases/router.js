@@ -10,7 +10,7 @@ describe('router',function(){
 		ack.router()
 	})
 
-  it.only('#errorsToArray',()=>{
+  it('#errorsToArray',()=>{
     const options = {array:[]}
     const router = ack.router().errorsToArray(options)
     const fakeReq = {
