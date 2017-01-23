@@ -625,7 +625,7 @@ function htmlCloseError(options){
 		res.statusCode = err.status || err.statusCode || 500
 		res.statusMessage = msg
 		res.setHeader('Content-Type','text/html')
-		if(msg)res.setHeader('message', msg)
+		if(msg)res.setHeader('message', cleanStatusMessage(msg))
 		var output = '<h3>'+msg+'</h3>'//message meat
     var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
 
@@ -645,9 +645,10 @@ function htmlCloseError(options){
 	}
 }
 
-/** returns middleware that handles errors with JSON style details
-	@options {debug:true/false, debugLocalNetwork:true}
-*/
+function cleanStatusMessage(statusMessage){
+	return statusMessage.toString().replace(/[`$;|&\\/]/g,'_')//.replace(/[^0-9a-z]/ig,'')//
+}
+
 /** returns middleware that handles errors with JSON style details
 	@options {debug:true/false, debugLocalNetwork:true}
 */
@@ -659,7 +660,7 @@ function jsonCloseError(options){
 			var statusMessage = err.message || err.code
 			var statusCode = err.status || err.statusCode || 500
 
-			statusMessage = statusMessage.toString().replace(/[`$;|&\\]/g,'_')//.replace(/[^0-9a-z]/ig,'')//
+			statusMessage = cleanStatusMessage(statusMessage)
 			statusCode = statusCode.toString().replace(/[^0-9]/g,'')
 
 			res.statusMessage = statusMessage
