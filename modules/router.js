@@ -646,7 +646,7 @@ function htmlCloseError(options){
 }
 
 function cleanStatusMessage(statusMessage){
-	return statusMessage.toString().replace(/[`$;|&\\/]/g,'_')//.replace(/[^0-9a-z]/ig,'')//
+	return statusMessage.toString().replace(/[^0-9a-z ]/ig,'_')//.replace(/[`$;|&\\/]/g,'_')
 }
 
 /** returns middleware that handles errors with JSON style details
