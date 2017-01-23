@@ -664,7 +664,7 @@ function jsonCloseError(options){
 
 	    var rtn = {
 	      error: {
-	        message: statusMessage.toString(),
+	        message: statusMessage,
 	        code: res.statusCode,
 					"debug": {
 						"stack": err.stack
@@ -690,7 +690,7 @@ function jsonCloseError(options){
 	    */
 
 			var output = JSON.stringify(rtn)
-			res.setHeader('message', rtn.error.message)
+			res.setHeader('message', statusMessage)
 			res.setHeader('Content-Type','application/json')
 			res.setHeader('Content-Length', output.length)
 	    res.end( output );
