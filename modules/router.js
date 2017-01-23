@@ -659,7 +659,7 @@ function jsonCloseError(options){
 
 	    var rtn = {
 	      error: {
-	        message: msg,
+	        message: msg.toString(),
 	        code: res.statusCode,
 					"debug": {
 						"stack": err.stack
@@ -667,20 +667,25 @@ function jsonCloseError(options){
 	      }
 	    }
 
-			var output = JSON.stringify(rtn)
-			res.setHeader('message',msg)
-			res.setHeader('Content-Type','application/json')
-			res.setHeader('Content-Length',output.length)
-
 	    var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
 	    if(isDebug){
 	      rtn.error.stack = err.stack//debug requests will get stack traces
 	    }
 
-	    res.end( output );
+	    if(res.json){
+	    	res.json(rtn)
+	    }else{
+				var output = JSON.stringify(rtn)
+				res.setHeader('message', rtn.error.message)
+				res.setHeader('Content-Type','application/json')
+				res.setHeader('Content-Length', output.length)
+		    res.end( output );
+	    }
 	  }catch(e){
 	    console.error('ack/modules/reqres/res.js jsonCloseError failed hard')
 	    console.error(e)
+	    console.error('------ original error ------')
+	    console.error(err)
 
 	    if(next){
 	      next(err)
@@ -690,6 +695,7 @@ function jsonCloseError(options){
 	  }
 	}
 }
+
 
 
 

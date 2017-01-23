@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.2.1] - 2017-01-23
+### Enhanced
+- ack.router().jsonCloseError() to first try to close errors with res.json
+
 ## [1.2.0] - 2017-01-23
 ### Upgraded Dependencies
 
