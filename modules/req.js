@@ -24,6 +24,22 @@ var req = function($scope){
 	return this
 }
 
+/** set options
+	@options - name or object of option(s)
+	@value - when @options is string, then value is required
+*/
+req.prototype.set = function(options, value){
+	if(!options)return
+
+	if(options.constructor==Object){
+		Object.assign(this.options, options)
+	}else{
+		this.options[options] =  value
+	}
+
+	return this
+}
+
 req.prototype.setAuthBearer = function(token){
 	return this.header('Authorization','Bearer '+token)
 }
@@ -187,7 +203,12 @@ req.prototype.put = function(dataOrAddress, data){
 	return this.send()
 }
 
-/** triggers request to send */
+/**
+	triggers request to send
+	@options{
+		spread:true - by default the promise is (response, request, response.body) but can be (response)
+	}
+*/
 req.prototype.send = function(address, options){
 	var req,
 		ops = this.getTransmissionOptions(),
@@ -198,23 +219,33 @@ req.prototype.send = function(address, options){
 		ops.uri = ops.uri ? ops.uri += address : address
 	}
 
-	if(options)Object.assign(ops, options)
+	options = options || {}
+	Object.assign(ops, options)
 
 	this.preSendOps(ops)
 
-	return ack.promise().bind(this)
+	let promise = ack.promise().bind(this)
 	.callback(function(callback){
 		req = request[ops.method.toLowerCase()](ops, callback)
 	})
-	.then(function(response, body){
-		if(orgUrl){
-			ops.uri = orgUrl
-			ops.url = orgUrl
-		}
-		return [response, req, body]
-	})
-	.spread(this.procresreq)
-	.spread()//array to func arg array for next promise
+
+	const spread = options.spread || this.options.spread
+	if(spread==null || spread){
+		promise = promise
+		.then(function(response, body){
+			if(orgUrl){
+				ops.uri = orgUrl
+				ops.url = orgUrl
+			}
+			return [response, req, body]
+		})
+		.spread(this.procresreq)
+		.spread()//array to func arg array for next promise
+	}else{
+		promise = promise.then((response,body)=>response)
+	}
+
+	return promise
 }
 
 req.prototype.preSendOps = function(ops){

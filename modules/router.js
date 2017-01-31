@@ -51,19 +51,22 @@ module.exports.respond = function(string, options){
 	let type = 'text/plain'
 	let eTag = ''
 	let getter = function(req,res,next){
-		return {string:string, type:type, etag:eTag}
+		return Promise.resolve( {string:string, type:type, etag:eTag} )
 	}
 	
 	if(string.constructor==Function){
 		getter = function(req,res,next){
-			const rtn = string(req,res,next)
-			const isString = typeof(rtn)=='string'
-			const output = isString ? rtn : JSON.stringify(rtn)
-			return {
-				string:output,
-				etag:ack.etag(output),
-				type:isString?'text/plain':'application/json'
-			}
+			return Promise.resolve( string(req,res,next) )
+			.then(rtn=>{
+				const isString = typeof(rtn)=='string'
+				const mime = isString?'text/plain':'application/json'
+				const output = isString ? rtn : JSON.stringify(rtn)
+				return {
+					string:output,
+					etag:output,//ack.etag(output),
+					type:mime
+				}
+			})
 		}
 		isString = false
 	}else	if(typeof(string)!='string'){
@@ -77,18 +80,20 @@ module.exports.respond = function(string, options){
 
 	return function(req,res,next){
 		var noMatchHead = ack.reqres(req,res).input.header('If-None-Match')
-		const toSend = getter(req,res,next)
-
-		if(noMatchHead == toSend.etag){
-			res.statusCode = 304
-			res.statusMessage = 'Not Modified'
-			res.end()
-		}else{
-			res.setHeader('ETag', toSend.etag)
-			res.setHeader('Content-Length', toSend.string.length)
-			res.setHeader('Content-Type', toSend.type)
-			res.end(toSend.string)
-		}
+		return getter(req,res,next)
+		.then(toSend=>{
+			if(noMatchHead == toSend.etag){
+				res.statusCode = 304
+				res.statusMessage = 'Not Modified'
+				res.end()
+			}else{
+				res.setHeader('ETag', toSend.etag)
+				res.setHeader('Content-Length', toSend.string.length)
+				res.setHeader('Content-Type', toSend.type)
+				res.end(toSend.string)
+			}
+		})
+		.catch(next)
 	}
 }
 

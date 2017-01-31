@@ -1,6 +1,12 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.2.10] - 2017-01-31
+### Added
+- ack.request().set()
+### Enhanced
+- ack.request().send(url,option) added option.spread
+
 ## [1.2.1] - 2017-01-23
 ### Enhanced
 - ack.router().jsonCloseError() to first try to close errors with res.json

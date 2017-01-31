@@ -33,10 +33,22 @@ describe('req',function(){
 		ack.req('0.0.0.0:3000').send()
 		.then(function(body, response){
 			reqTester(body, response)
-
 			assert.equal(body.constructor, String)
 			body = JSON.parse(body)
 			assert.equal(body.url, '/')
+		})
+		.then(done).catch(done)
+	})
+
+	it('get{spread:false}',function(done){
+		ack.req('0.0.0.0:3000')
+		.set({spread:false})
+		.send()
+		.then(function(response){
+			assert.equal(response.body.constructor, String)
+			var body = JSON.parse(response.body)
+			assert.equal(body.url, '/')
+
 		})
 		.then(done).catch(done)
 	})
