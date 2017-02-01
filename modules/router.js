@@ -337,7 +337,7 @@ function getMorganDefaultFormat(options,add){
 	options = options || {}
 	const status = options.stream ? ':status' : ':colored-status'
 	const method = options.stream ? ':method' : ':colored-method'
-	let rtn = status+' :url-short '+method+' :res[content-length] :response-time ms :remote-addr :remote-user :device-name :browser-name'
+	let rtn = status+' '+method+' :url-short :res[content-length] :response-time ms :remote-addr :remote-user :device-name :browser-name'
 	if(add){
 		rtn += ' '+add
 	}
