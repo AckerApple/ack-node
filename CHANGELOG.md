@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.2.12] - 2017-01-31
+### Added
+- ack.router().noRobots
+
 ## [1.2.10] - 2017-01-31
 ### Added
 - ack.request().set()
