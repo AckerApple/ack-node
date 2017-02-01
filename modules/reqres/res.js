@@ -318,7 +318,7 @@ function reqResOutputToString(req, res, output){
     if(output===null || typeof output=='object'){
       output = JSON.stringify(output)
       res.setHeader('content-type','application/json')
-    }else if(ack.reqres(res, req).isHtml()){
+    }else if(ack.reqres(req,res).isHtml()){
       res.setHeader('content-type','text/html')
     }else{
       res.setHeader('content-type','text/plain')

@@ -206,6 +206,7 @@ app.get('/', ackRouters.ignoreFavors(), ackRouters.timeout(3000), ackRouters.com
 - [.uploadOneByNameToPath(name, path, options)](#uploadonebynametopathname-options)
 - [.uploadArrayByName(name, options)](#uploadarraybynamename-options)
 - [.localNetworkOnly(message)](#localnetworkonlymessage)
+- [.noRobots()](#norobots)
 
 
 ##### .cacheFor(seconds)
@@ -330,6 +331,9 @@ returns middleware the records errors to an array of specified maxLength
 
 ##### .localNetworkOnly(message)
 - returns middleware that only allows local network requests
+
+##### .noRobots()
+- returns middleware that responds with a text/plain message of "User-agent: *\rDisallow: /"
 
 ## ack-x
 Additional lower level functionality is provided by [ack-x](https://www.npmjs.com/package/ack-x)

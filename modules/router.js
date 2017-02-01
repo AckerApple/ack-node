@@ -15,6 +15,14 @@ var isProNode = process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase()==='PR
 
 module.exports.safeHeaders = safeHeaders
 
+/** returns middleware that responds with a text/plain message of "User-agent: *\rDisallow: /" */
+module.exports.noRobots = function(){
+	return function(req,res,next){
+		res.header("Content-Type", "text/plain");
+		res.end("User-agent: *\rDisallow: /")
+	}
+}
+
 /** returns middleware that sets cache-control header for every request */
 module.exports.cacheFor = function(seconds){
 	return function(req, res, next) {
@@ -130,7 +138,9 @@ module.exports.ignoreFavors = function(statusCode){
 	statusCode = statusCode || 404
 	return function(req, res, next) {
     if(/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)){
-      res.status(statusCode).end();
+    	res.statusCode = statusCode
+      //res.status(statusCode).end();
+      res.end()
     }else if(next){
       next()
     }
@@ -597,10 +607,11 @@ morgan.token('device-name',function(req,res){
 })
 
 morgan.token('url-short',function(req,res){
-	var url = req.orginalUrl || req.url
+	var url = req.originalUrl || req.url
 	url = url.replace(/(=[^=&]{5})[^=&]+/g,'$1...')
 	return url
 })
+
 
 morgan.token('colored-status',function(req,res){
 	var status = res.statusCode
