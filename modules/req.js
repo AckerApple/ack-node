@@ -6,7 +6,13 @@ var	ack = require('../index.js'),
 	url = require('url')
 	//,http = require('http')
 
-//outbound request maker. See http.request. options:{host: 'localhost',port: '3000'}
+/** outbound request maker. See http.request.
+	@options{
+		host: String,
+		port: Number,
+		spread:true - by default the promise is (response, request, response.body) but can be (response)
+	}
+*/
 var req = function($scope){
 	this.options = ack.accessors({headers:{}})
 
@@ -229,7 +235,7 @@ req.prototype.send = function(address, options){
 		req = request[ops.method.toLowerCase()](ops, callback)
 	})
 
-	const spread = options.spread || this.options.spread
+	const spread = ops.spread==null ? this.options.spread : ops.spread
 	if(spread==null || spread){
 		promise = promise
 		.then(function(response, body){
