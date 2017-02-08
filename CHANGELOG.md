@@ -1,6 +1,9 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.3.0] - 2017-02-08
+### Updated ack-path, which has breaking changes
+
 ## [1.2.12] - 2017-01-31
 ### Added
 - ack.router().noRobots
