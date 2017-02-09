@@ -1,6 +1,10 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.3.1] - 2017-02-08
+### Enhanced
+- error routers and handlers
+
 ## [1.3.0] - 2017-02-08
 ### Updated ack-path, which has breaking changes
 

@@ -1,6 +1,6 @@
 {
   "name": "ack-node",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
