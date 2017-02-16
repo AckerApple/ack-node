@@ -29,6 +29,7 @@ var ack = require('ack-node')
 ## Modules
 
 ### ack.promise
+See [ack-p](https://www.npmjs.com/package/ack-p) for full details
 
 #### executed already running promise
 ```
@@ -96,7 +97,8 @@ ack.file(__dirname).join('test-file.js').removeExt().path//Manipulates path by r
 ```
 
 ### ack.jwt
-json web tokens
+json web tokens. See [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) for full details
+
 ```
 var payload = {some:'data',hello:'world'}
 var signed = ack.jwt(payload,'your-secret-key').sign()
