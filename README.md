@@ -17,12 +17,12 @@ Common server-side functionality, wrapped in one package, the Acker way
 - [ack-x](#ack-x)
 
 ## Installation
-```
+```bash
 $ npm install ack-node --save
 ```
 
 ## Usage
-```
+```javascript
 var ack = require('ack-node')
 ```
 
@@ -32,19 +32,19 @@ var ack = require('ack-node')
 See [ack-p](https://www.npmjs.com/package/ack-p) for full details
 
 #### executed already running promise
-```
+```javascript
 ack.promise('val1','val2').then((v1,v2)=>console.log(v1,v2))
 ```
 
 #### ack.Promise
 Traditional resolve/reject promise
-```
+```javascript
 ack.Promise((res,rej)=>{}).then()
 ```
 
 ### ack.ip
 Internet Protocol address functionality
-```
+```javascript
 /** matches 192.168 and other internal network ips */
 ack.ip('192.168.0.0').isPrivate()
 
@@ -54,7 +54,7 @@ ack.ip('127.0.0.0').isHost()
 
 ### ack.path - system directory functionality
 See [ack-path](https://www.npmjs.com/package/ack-path) for full details
-```
+```javascript
 //created directory if not existant
 ack.path(__dirname).paramDir().then()
 
@@ -83,7 +83,7 @@ ack.path(__dirname).sync().exists()//NONASYNC
 System file functionality
 
 See [ack-path](https://www.npmjs.com/package/ack-path) for full details
-```
+```javascript
 ack.file(__dirname).delete().then()
 ack.file(__dirname).getMimeType()//Ex: application/javascript
 ack.file(__dirname).stat().then(stats=>stats.size)
@@ -99,7 +99,7 @@ ack.file(__dirname).join('test-file.js').removeExt().path//Manipulates path by r
 ### ack.jwt
 json web tokens. See [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) for full details
 
-```
+```javascript
 var payload = {some:'data',hello:'world'}
 var signed = ack.jwt(payload,'your-secret-key').sign()
 
@@ -110,7 +110,7 @@ ack.jwt(signed,'your-secret-key').verify().then(payload)
 Outbound http/https requests based on functionality provived by [request](https://www.npmjs.com/package/request)
 
 Send Example
-```
+```javascript
 ack.req(url)
 .send()
 .then((body,response)=>console.log(body))
@@ -118,7 +118,7 @@ ack.req(url)
 ```
 
 Send Example Without Promise Spread
-```
+```javascript
 ack.req(url).set('spread',false)
 .send()
 .then(response=>console.log(response.body))
@@ -126,21 +126,21 @@ ack.req(url).set('spread',false)
 ```
 
 Post Example
-```
+```javascript
 ack.req(url).post(data)
 .then((body,response)=>console.log(body))
 .catch(e=>console.error(e))
 ```
 
 Put Example
-```
+```javascript
 ack.req(url).put(data)
 .then((body,response)=>console.log(body))
 .catch(e=>console.error(e))
 ```
 
 Delete Example
-```
+```javascript
 ack.req(url).delete()
 .then((body,response)=>console.log(body))
 .catch(e=>console.error(e))
@@ -150,14 +150,14 @@ ack.req(url).delete()
 Request response handler
 
 sendJson(variable, pretty)
-```
+```javascript
 app.use((req,res)=>{
   ack.reqres(req,res).sendJSON( {hello:"world"} )
 })
 ```
 
 send file
-```
+```javascript
 app.use((req,res)=>{
   const reqres = ack.reqres(req,res)
   reqres.input.header('content-type','application/pdf')
@@ -168,12 +168,12 @@ app.use((req,res)=>{
 ### ack.router
 Access to Middleware
 
-```
+```javascript
 const ackRouters = require('ack-node').router()
 ```
 
 Mix with Connect or Express
-```
+```javascript
 var app = require('express')()//common request routing app
 
 //Ignore fav.ico, timeout in 3000ms, and all requests will be gzipped if applicable
@@ -341,7 +341,7 @@ returns middleware the records errors to an array of specified maxLength
 Additional lower level functionality is provided by [ack-x](https://www.npmjs.com/package/ack-x)
 
 Date Example
-```
+```javascript
 require('ack-node').date().now().mmddyyyy()
 ```
 

@@ -1,8 +1,12 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.3.3] - 2017-03-22
+### Enhanced
+- colorized docs
+
 ## [1.3.2] - 2017-02-15
-## Added
+### Added
 - documentation
 
 ## [1.3.1] - 2017-02-08
