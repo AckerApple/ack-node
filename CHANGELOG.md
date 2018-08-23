@@ -3,6 +3,7 @@ All notable changes to this project will be documented here.
 
 ## [1.4.0] - 2018-08-23
 - Updated all dependencies, one or more had minor version number changed
+- uses new ack-x typescripting import processes
 
 ## [1.3.3] - 2017-03-22
 ### Enhanced
