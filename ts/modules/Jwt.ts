@@ -1,5 +1,5 @@
 "use strict";
-var jx = require('ack-x')
+var jx = require('ack-x').ack
 	,jsonwebtoken = require('jsonwebtoken')
 
 var Jwt = function Jwt($scope){
@@ -8,7 +8,6 @@ var Jwt = function Jwt($scope){
 	this.data.options.algorithm = this.data.options.algorithm || 'HS256'
 	this.data.expireKeyName = 'exp'
 	this.jsonwebtoken = jsonwebtoken
-	return this
 }
 
 //encrypts data into token
@@ -78,6 +77,6 @@ Jwt.prototype.verify = function(){
 	.spreadCallback(jsonwebtoken.verify)
 }
 
-module.exports = function(data, key, options){
+export function method(data, key, options){
 	return new Jwt({token:data, payload:data, key:key, options:options})
 }

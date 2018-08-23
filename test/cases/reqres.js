@@ -1,4 +1,4 @@
-var ack = require('../../index.js'),
+var ack = require('../../index.js').ackX,
 		assert = require('assert'),
 		http = require('http')
 
@@ -160,7 +160,7 @@ describe('reqres',function(){
 			ack.req().send('localhost:3001/etag-test')
 			.then(function(body,response){
 				assert.equal(body, '{"test":22}')
-				assert.equal(response.headers.etag, '"b-6VkZ+HYGr0uajuu/ajew9Q"')
+				assert.equal(response.headers.etag, '"b-0+CD2vvpRIv9sP/0NTat4KWwtNM"')
 				assert.equal(response.headers['content-type'], 'application/json')
 				assert.equal(response.headers['content-length'], 11)
 				etag = response.headers.etag

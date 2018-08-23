@@ -1,6 +1,6 @@
 {
   "name": "ack-node",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "Common server-side functionality, wrapped in one package, the Acker way",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "mocha ./test/cases --recursive",
-    "test:watch": "mocha ./test/cases --recursive --watch"
+    "test:watch": "mocha ./test/cases --recursive --watch",
+    "build:js": "tsc ts/modules/** --outDir js --declaration true --lib es6"
   },
   "repository": {
     "type": "git",
@@ -25,27 +26,30 @@
   },
   "homepage": "https://github.com/AckerApple/ack-node#readme",
   "dependencies": {
-    "ack-path": "^1.4.0",
-    "ack-x": "^1.2.20",
-    "body-parser": "^1.16.0",
-    "compression": "^1.6.2",
-    "connect-timeout": "^1.8.0",
-    "cookies": "^0.6.2",
-    "cors": "^2.8.1",
+    "ack-path": "^1.5.16",
+    "ack-x": "^1.4.10",
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "connect-timeout": "^1.9.0",
+    "cookies": "^0.7.1",
+    "cors": "^2.8.4",
     "crypto-js": "^3.1.6",
-    "etag": "^1.7.0",
-    "jsonwebtoken": "^7.2.1",
-    "morgan": "^1.7.0",
-    "multer": "^1.2.1",
-    "multiparty": "^4.1.3",
-    "node-schedule": "^1.2.0",
+    "etag": "^1.8.1",
+    "jsonwebtoken": "^8.3.0",
+    "morgan": "^1.9.0",
+    "multer": "^1.3.1",
+    "multiparty": "^4.2.1",
+    "node-schedule": "^1.3.0",
     "nodedump": "^0.0.8",
-    "nodemailer": "^2.7.2",
-    "pug": "^2.0.0-beta6",
-    "request": "^2.79.0",
-    "ua-parser-js": "^0.7.12"
+    "nodemailer": "^4.6.8",
+    "pug": "^2.0.3",
+    "request": "^2.88.0",
+    "ua-parser-js": "^0.7.18"
   },
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "@types/node": "^10.7.1",
+    "mocha": "^5.2.0",
+    "npm-run-all": "^4.1.3",
+    "typescript": "^3.0.1"
   }
 }

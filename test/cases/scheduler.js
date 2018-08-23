@@ -1,6 +1,6 @@
-var ack = require('../../index.js')
-	,ackTask = ack.scheduler()
-	,path = require('path')
+var ack = require('../../index.js').ackX
+var ackTask = ack.scheduler()
+var path = require('path')
 
 describe('ackTask',function(){
 	this.timeout(4000)

@@ -1,5 +1,5 @@
 "use strict";
-var ack = require('../../index.js'),
+var ack = require('../../index.js').ackX,
 	assert = require('assert'),
 	path = require('path'),
   hWorldPath = path.join(__dirname,'../','assets','viewroute','helloWorld.jade')

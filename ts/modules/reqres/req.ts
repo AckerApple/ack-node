@@ -1,11 +1,12 @@
-"use strict";
-var	ack = require('../../index.js'),
+import { dump } from "nodedump"
+
+var	ack = require('../../index.js').ackX,
 	multiparty = require('multiparty'),//used to parse inbound request form multi/part post variables
 	cookies = require('cookies'),
 	url = require('url')
 
 //Request Return : Object to handle processing request (process client input, uploads, paths)
-var reqrtn = function(req,res){
+export function reqrtn(req,res){
 	if(req && req._headers){
 		throw new Error('Received response object where request object was expected');
 	}
@@ -16,7 +17,6 @@ var reqrtn = function(req,res){
 		//localHostIpArray:['localhost','127.0.0.1','::1']
 	}
 	this.isClientInputLoaded = false
-	return this
 }
 
 reqrtn.prototype.getMethod = function(){
@@ -124,13 +124,13 @@ reqrtn.prototype.isHttps = function(){
 
 //request folder path
 reqrtn.prototype.Path = function(){
-	var p = new reqrtn.path(this.req)// || this.req.url
+	var p = new path(this.req)
 	this.Path = function(){return p}//morph to deliver cache
 	return p
 }
 
 reqrtn.prototype.path = function(){
-	ack.deprecated('reqrtn.path() deprecated. Use reqrtn.Path()')
+	ack.deprecated('path() deprecated. Use Path()')
 	return this.Path()
 }
 
@@ -194,7 +194,7 @@ reqrtn.prototype.getHost = function(){
 reqrtn.prototype.input = function(){
 	//if(!this.data.clientInput)throw 'Client input not yet loaded'
 	if(!this.data.clientInput){
-		this.data.clientInput = new reqrtn.clientInput(this.req, this.res)
+		this.data.clientInput = new clientInput(this.req, this.res)
 	}
 	return this.data.clientInput
 }
@@ -205,7 +205,7 @@ reqrtn.prototype.loadClientInput = function(){
 	return ack.promise()
 	.bind(this)
 	.then(function(){
-		this.data.clientInput = new reqrtn.clientInput(this.req, this.res)
+		this.data.clientInput = new clientInput(this.req, this.res)
 
 		if(!this.req.body){
 			return this.data.clientInput.parseFormVars().bind(this).set(this.data.clientInput)
@@ -251,28 +251,27 @@ reqrtn.prototype.isMultipart = function(){
 //!!!Non-prototypes below
 
 //express request handler with array shifting
-reqrtn.processArray = function(req, res, nextarray){
+function processArray(req, res, nextarray){
 	if(!nextarray || !nextarray.length)return
 	var proc = nextarray.shift()
 	proc(req, res, function(){
-		reqrtn.processArray(req,res,nextarray)
+		processArray(req,res,nextarray)
 	})
 }
 
 
 //path component to aid in reading the request path
-reqrtn.path = function(req){
+function path(req){
 	var oUrl = req.originalUrl || req.url
 	this.string = oUrl.split('?')[0]
 	this.relative = req.url.split('?')[0]
-	return this
 }
 
-reqrtn.path.prototype.getString = function(){
+path.prototype.getString = function(){
 	return this.string
 }
 
-reqrtn.path.prototype.array = function(){
+path.prototype.array = function(){
 	var s = this.string.trim().split('/')
 	while(typeof(s[0]) != 'undefined' && s[0].length==0)s.shift()//remove opening empty-strings
 	while(typeof(s[s.length-1]) != 'undefined' && s[s.length-1].length==0)s.pop()//remove ending empty-strings
@@ -281,13 +280,13 @@ reqrtn.path.prototype.array = function(){
 
 
 //client input object
-reqrtn.ci = function(a){
+function ci(a){
 	this.data = a || {}
 	return this
 }
 
-reqrtn.ci.prototype.dump = function(options){
-	return nodedump.dump(this.data,options)
+ci.prototype.dump = function(options){
+	return dump(this.data,options)
 }
 
 
@@ -295,13 +294,12 @@ reqrtn.ci.prototype.dump = function(options){
 
 
 //full client input (includes extra form & url original ref)
-reqrtn.clientInput = function(req, res){
+function clientInput(req, res){
 	this.req = req;this.res = res
 	this.data = {}
-	return this
 }
 
-reqrtn.clientInput.prototype.combined = function(){
+clientInput.prototype.combined = function(){
 	if(this.Combined){
 		return this.Combined
 	}
@@ -316,7 +314,7 @@ reqrtn.clientInput.prototype.combined = function(){
 	return this.Combined
 }
 
-reqrtn.clientInput.prototype.combine = function(varsOrScopeName1, varsOrScopeName2, varsOrScopeName3){
+clientInput.prototype.combine = function(varsOrScopeName1, varsOrScopeName2, varsOrScopeName3){
 	var combined = ack.accessors()
 		,args = Array.prototype.slice.call(arguments)
 
@@ -351,14 +349,14 @@ reqrtn.clientInput.prototype.combine = function(varsOrScopeName1, varsOrScopeNam
 	return combined
 }
 
-reqrtn.clientInput.prototype.getAuthBearer = function(){
+clientInput.prototype.getAuthBearer = function(){
 	var authString = this.headers().get('Authorization')
 	if(authString){
 		return authString.replace(/^[^ \r\n\t]+[ \r\n\t]/g,'')//Authorization: Bearer TOKEN_STRING
 	}
 }
 
-reqrtn.clientInput.prototype.cookies = function(){
+clientInput.prototype.cookies = function(){
 	if(this.Cookies)return this.Cookies
 	this.Cookies = new cookies(this.req, this.res)
 	this.Cookies.all = function(){
@@ -381,13 +379,13 @@ reqrtn.clientInput.prototype.cookies = function(){
 	return this.Cookies
 }
 
-reqrtn.clientInput.prototype.headers = function(){
+clientInput.prototype.headers = function(){
 	if(this.Headers)return this.Headers
 	this.Headers = ack.accessors(this.req.headers)// get/set methods and convenient dump method
 	return this.Headers
 }
 
-reqrtn.clientInput.prototype.url = function(){
+clientInput.prototype.url = function(){
 	if(this.Url){
 		return this.Url
 	}
@@ -402,7 +400,7 @@ reqrtn.clientInput.prototype.url = function(){
 	return this.Url
 }
 
-reqrtn.clientInput.prototype.multipart = function(){
+clientInput.prototype.multipart = function(){
 	if(this.Multipart)return this.Multipart
 	if(!this.req.body){
 		throw new Error('multipart form variables have not yet been parsed! req.body is '+typeof(this.req.body));
@@ -411,7 +409,7 @@ reqrtn.clientInput.prototype.multipart = function(){
 	return this.Form
 }
 
-reqrtn.clientInput.prototype.form = function(){
+clientInput.prototype.form = function(){
 	if(!this.req.body){
 		var msg = 'form variables have not yet been parsed! req.body is '+typeof(this.req.body)+'. req is '+typeof(this.req)
 		throw new Error(msg);
@@ -424,13 +422,13 @@ reqrtn.clientInput.prototype.form = function(){
 /** returns promise - {fields},{files}
  Warning, once engaged during a request, no other multi-part parser will be able to see the multi-part
 */
-reqrtn.clientInput.prototype.parseMultiPart = function(){
+clientInput.prototype.parseMultiPart = function(){
 	var Form = new multiparty.Form()
 	return ack.promise().set(this.req).bind(Form).callback(Form.parse)
 }
 
 /** all multipart fields are added to request.body */
-reqrtn.clientInput.prototype.mergeBodyAndMultipart = function(nullAsEmptyString){
+clientInput.prototype.mergeBodyAndMultipart = function(nullAsEmptyString){
 	var promise = ack.promise().bind(this)
 	var isMultipart = new reqrtn(this.req, this.res).isMultipart()
 	if(isMultipart){
@@ -459,12 +457,12 @@ reqrtn.clientInput.prototype.mergeBodyAndMultipart = function(nullAsEmptyString)
 	.spread()//cast array to positional-arguments
 }
 
-reqrtn.clientInput.prototype.nullsToEmptyString = function(){
+clientInput.prototype.nullsToEmptyString = function(){
 	ack(this.req.body).nullsToEmptyString()
 }
 
 //returns promise
-reqrtn.clientInput.prototype.parseFormVars = function(nullAsEmptyString){
+clientInput.prototype.parseFormVars = function(nullAsEmptyString){
 	return ack.promise().bind(this).callback(function(callback){
 		ack.router().parseBody({
 			nullAsEmptyString:nullAsEmptyString==null?true:nullAsEmptyString
@@ -479,6 +477,3 @@ reqrtn.clientInput.prototype.parseFormVars = function(nullAsEmptyString){
   })
   .spread()//cast array to positional-arguments
 }
-
-
-module.exports = reqrtn

@@ -1,29 +1,28 @@
 "use strict";
-var schedule = require('node-schedule'),
-	ack = require('../index.js')
+import * as schedule from "node-schedule"
+import { ackX } from "../index.js"
 
 var ackTask = function ackTask($scope){
 	this.data = $scope || {}
 	this.data.log = this.data.log==null?true:this.data.log
-	return this
 }
 
-//	this.data.logFilePath = this.data.logFilePath || ack.path(__dirname).join('ackTaskLog.txt')
+//	this.data.logFilePath = this.data.logFilePath || ackX.path(__dirname).join('ackTaskLog.txt')
 
 ackTask.prototype.getLogFilePath = function(){
 	if(this.data.logFilePath)
 		return this.data.logFilePath
 
-	this.data.logFilePath = ack.path(__dirname).join('logs','ackTaskLog.txt').path
+	this.data.logFilePath = ackX.path(__dirname).join('logs','ackTaskLog.txt').path
 	return this.data.logFilePath
 }
 
 ackTask.prototype.getLogFile = function(){
-	return ack.file(this.getLogFilePath())
+	return ackX.file(this.getLogFilePath())
 }
 
 ackTask.prototype.getRequirePromiseByPath = function(path){
-	var promise = ack.promise().callback(function(callback){
+	var promise = ackX.promise().callback(function(callback){
 		var	exec = require('child_process').exec
 			,cmdProc = function(error, stdout, stderr){
 				if(error){
@@ -38,7 +37,7 @@ ackTask.prototype.getRequirePromiseByPath = function(path){
 
 	if(this.data.log){
 		promise = promise.past(function(r){
-			var msg = '---path-run@'+this.getLogFile().path+'@'+new Date()+'\r\n'
+			var msg = '---path-run@'+this.getLogFile().path+'@'+new Date()+'\n'//\r
 			return this.logResult(msg+r)
 		},this)
 	}
@@ -68,7 +67,7 @@ ackTask.prototype.pathEveryMil = function(path, ms, each){
 	var $this = this
 	var will = function(){
 
-		var p = ack.promise()
+		var p = ackX.promise()
 		.set(path).bind($this)
 		.then($this.getRequirePromiseByPath)//create a promise that can be repeatedily fired
 		.then(function(){
@@ -94,14 +93,14 @@ ackTask.prototype.pathOnDate = function(path, date){
 	if(a<=0){//already expired
 		return this.getRequirePromiseByPath(path)
 	}
-	return ack.promise().delay(a).set(path).then(this.getRequirePromiseByPath,this)
+	return ackX.promise().delay(a).set(path).then(this.getRequirePromiseByPath,this)
 }
 
 //hour = hour of day (military time)
 ackTask.prototype.pathAtTimeOnWeekDays = function(path, hour, minute, each, success, fail){
 	var $this = this, index=0
 	var will = function(){
-		var p = ack.promise().set(path).then($this.getRequirePromiseByPath, $this)//create a promise that can be repeatedily fired
+		var p = ackX.promise().set(path).then($this.getRequirePromiseByPath, $this)//create a promise that can be repeatedily fired
 
 		if(success){
 			p = p.then(success)
@@ -127,7 +126,7 @@ ackTask.prototype.pathAtTimeOnWeekDays = function(path, hour, minute, each, succ
 	return this//return the will so after firing actions can run
 }
 
-module.exports = function($scope){
+export function method($scope){
 	return new ackTask($scope)
 }
-module.exports.Class = ackTask
+//module.exports.Class = ackTask

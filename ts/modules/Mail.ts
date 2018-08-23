@@ -38,7 +38,6 @@ var nodemailer = require('nodemailer'),
 var Mail = function(connectionProps, mailOptions){
 	this.connectionProps = connectionProps || {}
 	this.mailOptions = mailOptions || {}
-	return this
 }
 
 Mail.prototype.send = function(){
@@ -52,6 +51,6 @@ Mail.prototype.send = function(){
 	})
 }
 
-module.exports = function(connectionProps, mailOptions){
+export function method(connectionProps, mailOptions){
 	return new Mail(connectionProps, mailOptions)
 }

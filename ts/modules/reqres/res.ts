@@ -1,6 +1,6 @@
 "use strict";
-var ack = require('../../index.js'),
-  reqrtn = require('./req'),
+var ack = require('../../index.js').ackX,
+  reqrtn = require('./req').reqrtn,
   cookies = require('cookies'),
   etag = require('etag'),
   fs = require('fs'),
@@ -9,7 +9,7 @@ var ack = require('../../index.js'),
 
 //inbound request response processor
 //returns function that appends output that also has a tun of helper methods
-var reqres = function(res, req){
+export function reqres(res, req){
   if(req && req._headers){
     throw new Error('Received response object where request object was expected');
   }
@@ -25,8 +25,6 @@ var reqres = function(res, req){
       }
     }
   }
-
-  return this//returns function that appends output
 }
 
 reqres.prototype.relocate = function(url, statusMessage, statusCode){
@@ -71,13 +69,13 @@ reqres.prototype.dump = function(v,ops){
   return this.append(v,ops)
 }
 
-reqres.isResHeaderSent = function(res){
+function isResHeaderSent(res){
   return res.closed || res._headerSent
 
 }
 
 reqres.prototype.isHeaderSent = function(){
-  return reqres.isResHeaderSent(this.res)
+  return isResHeaderSent(this.res)
 }
 
 //closing request handler
@@ -209,7 +207,7 @@ reqres.prototype.catch = function(method){
 
 //adds error object to output
 reqres.prototype.error = function(e){
-  var x,sa,d={}
+  var x,sa,d = <any>{}
 
   for(x in e)d[x] = e[x]
   d.stack = e.stack//back to string
@@ -248,7 +246,7 @@ reqres.prototype.etag = function(options){
 
 
 //error handler
-reqres.geterrhan = function(){
+export function geterrhan(){
   return function(err, req, res, next){
     try{
       new reqres(res, req).throw(err)
@@ -263,7 +261,7 @@ reqres.geterrhan = function(){
 /*
 reqres.getxreqhan = function(){
   return function(req,res,next){
-    if(!reqres.isResHeaderSent(res)){
+    if(!isResHeaderSent(res)){
       xreqhan(res, req);
     }
   }
@@ -274,7 +272,6 @@ reqres.getxreqhan = function(){
 /* !!! DEPRECATED !!! */
   var ClientInput = function ClientInput(res, req){
     this.res=res;this.req=req;
-    return this
   }
 
   /** cookies().set(name, [value], [{maxAge,expires,path,domain,secure,secureProxy,httpOnly,signed,overwrite}]) */
@@ -294,7 +291,7 @@ function getResOutput(res){
 
 /** close request handler */
 function xreqhan(res, req, output){
-  if(reqres.isResHeaderSent(res)){
+  if( isResHeaderSent(res) ){
     return console.error('request already closed', new Error().stack)
   }
 
@@ -343,7 +340,7 @@ function getErrorMsg(err){
   - response status always 500 unless (err.status || err.statusCode)
 */
 var reqResThrow = function(req, res, err){
-  if(reqres.isResHeaderSent(res)){//request has already been closed
+  if( isResHeaderSent(res) ){//request has already been closed
     //console.log('cannot throw error on an already closed request')
     return;
   }
@@ -365,5 +362,3 @@ var reqResThrow = function(req, res, err){
 var resMarkClosed = function(res){
   res.closed=1
 }
-
-module.exports = reqres

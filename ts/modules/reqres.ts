@@ -1,10 +1,10 @@
-"use strict";
-var Req = require('./reqres/req')
-var Res = require('./reqres/res')
-var ack = require('../index.js')
+import { reqrtn as Req } from "./reqres/req"
+import { reqres as Res } from "./reqres/res"
 
-var reqres = function reqres(req, res, $scope){
-	this.data = $scope || {}
+var ack = require('../index.js').ackX
+
+export function reqres(req, res, $scope={}){
+	this.data = $scope
 
 	var iReq = new Req(req, res)
 	var iRes = new Res(res, req)
@@ -35,8 +35,6 @@ var reqres = function reqres(req, res, $scope){
 		var module = iReq.input().form()
 		return name ? module.get(name) : module
 	}
-
-	return this
 }
 
 /* res */
@@ -140,6 +138,6 @@ var reqres = function reqres(req, res, $scope){
 	}
 /* end: req */
 
-module.exports = function(req, res){
+export function method(req, res){
 	return new reqres(req, res)
 }

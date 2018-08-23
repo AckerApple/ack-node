@@ -1,4 +1,4 @@
-var ack = require('../../index.js'),
+var ack = require('../../index.js').ackX,
 	assert = require('assert'),
   http = require('http'),
   path = require('path'),

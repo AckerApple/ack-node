@@ -1,6 +1,6 @@
 "use strict";
 
-var ack = require('../index.js'),
+var ack = require('../index.js').ackX,
     morgan = require('morgan'),
     multer = require('multer'),
     bodyParser = require('body-parser'),//used to parse inbound request form post variables
@@ -372,7 +372,7 @@ module.exports.logging = function(format,options){
   return morgan(format,options)
 }
 
-function getMorganDefaultFormat(options,add){
+function getMorganDefaultFormat(options, add?){
   options = options || {}
   const status = options.stream ? ':status' : ':colored-status'
   const method = options.stream ? ':method' : ':colored-method'
@@ -665,7 +665,7 @@ morgan.token('colored-status',function(req,res){
 function htmlCloseError(options){
   options = options || {}
   options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
-  return function(err, req, res, next){
+  return function(err, req, res, next?){
     var msg = err.message || err.code
     res.statusCode = err.status || err.statusCode || 500
     res.statusMessage = msg
@@ -673,16 +673,17 @@ function htmlCloseError(options){
     if(msg)res.setHeader('message', cleanStatusMessage(msg))
     var output = '<h3>'+msg+'</h3>'//message meat
     var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
+    var dump = null
 
     if(isDebug){
-      var dump = {Error:err}
+      dump = {Error:err}
       var jErr = ack.error(err)
       if(err.stack){
         output += jErr.getFirstTrace()
         dump.stack = jErr.getStackArray()
       }
     }else{
-      var dump = err
+      dump = err
     }
 
     output += ack(dump).dump('html')
@@ -708,10 +709,9 @@ function toError(err){
 /** returns middleware that handles errors with JSON style details
   @options {debug:true/false, debugLocalNetwork:true}
 */
-function jsonCloseError(options){
-  options = options || {}
+function jsonCloseError( options:any={} ){
   options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
-  return function(err, req, res, next){
+  return function(err, req, res, next?){
     try{
       err = toError(err)
       var statusMessage = err.message || err.code
@@ -735,7 +735,7 @@ function jsonCloseError(options){
 
       var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
       if(isDebug){
-        rtn.error.stack = err.stack//debug requests will get stack traces
+        rtn.error["stack"] = err.stack//debug requests will get stack traces
       }
 /*
       if(res.json){

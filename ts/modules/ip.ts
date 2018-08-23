@@ -1,7 +1,7 @@
 "use strict";
 
 var IP = function(ip){
-	this.ip = ip;return this
+	this.ip = ip
 }
 
 /** matches 192.168 and other internal network ips */
@@ -23,4 +23,4 @@ IP.prototype.isHost = function(){
 }
 
 
-module.exports = function(ip){return new IP(ip)}
+export function method(ip){return new IP(ip)}

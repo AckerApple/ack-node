@@ -1,9 +1,9 @@
-"use strict";
-var	ack = require('../index.js'),
-	request = require('request'),//required to make outbound requests
-	fs = require('fs'),
-	querystring = require('querystring'),//used to turn js object to post form variables for outbound requests
-	url = require('url')
+import { ackX } from "../index"
+
+var	request = require('request')//required to make outbound requests
+var	fs = require('fs')
+var	querystring = require('querystring')//used to turn js object to post form variables for outbound requests
+var	url = require('url')
 	//,http = require('http')
 
 /** outbound request maker. See http.request.
@@ -14,20 +14,19 @@ var	ack = require('../index.js'),
 	}
 */
 var req = function($scope){
-	this.options = ack.accessors({headers:{}})
+	this.options = {headers:{}}
 
 	if($scope && $scope.constructor == String){
-		this.options.data.uri = $scope
+		this.options.uri = $scope
 		$scope = {}
 	}
 
 	this.data = $scope || {}
 	this.jsonArray = []
-	this.posts = ack.accessors()
-	this.cookies = ack.accessors()
-	this.headers = ack.accessors()
-	this.vars = ack.accessors()//url query variables
-	return this
+	this.posts = {}
+	this.cookies = {}
+	this.headers = {}
+	this.vars = {}//url query variables
 }
 
 /** set options
@@ -51,28 +50,29 @@ req.prototype.setAuthBearer = function(token){
 }
 
 req.prototype.setUrl = function(url){
-	this.options.set('uri',url);return this
+	this.options.uri = url;
+	return this
 }
 
 /** name,val or {name:val} */
-req.prototype.option = function(){
-	this.options.set.apply(this.options,arguments)
+req.prototype.option = function(name:string|object, value:any){
+	setter(name, value, this.options)
 	return this
 }
 
-req.prototype.cookie = function(nameOrStruct, value){
-	this.cookies.set.apply(this.cookies,arguments)
+req.prototype.cookie = function(name:string|object, value:any){
+	setter(name, value, this.cookies)
 	return this
 }
 
-req.prototype.header = function(nameOrStruct, value){
-	this.headers.set.apply(this.headers, arguments)
+req.prototype.header = function(name:string|object, value:any){
+	setter(name, value, this.headers)
 	return this
 }
 
 /** adds form post variables */
-req.prototype.postVar = function(nameOrStruct, value){
-	this.posts.set.apply(this.posts,arguments)
+req.prototype.postVar = function(name:string|object, value:any){
+	setter(name, value, this.posts)
 	return this
 }
 
@@ -83,16 +83,16 @@ req.prototype.postVar = function(nameOrStruct, value){
 //req.prototype.post = req.prototype.postVar
 
 req.prototype.addFile = function(name, file){
-	this.options.data = this.options.data || {}
-	this.options.data.formData = this.options.data.formData || {}
-	this.options.data.formData[name] = file
+	this.options = this.options || {}
+	this.options.formData = this.options.formData || {}
+	this.options.formData[name] = file
 	return this
 }
 
 req.prototype.addFileByPath = function(name, path){
-	this.options.data = this.options.data || {}
-	this.options.data.formData = this.options.data.formData || {}
-	this.options.data.formData[name] = fs.createReadStream(path)
+	this.options = this.options || {}
+	this.options.formData = this.options.formData || {}
+	this.options.formData[name] = fs.createReadStream(path)
 	return this
 }
 
@@ -102,25 +102,25 @@ req.prototype.json = function(value){
 }
 
 /** add query var */
-req.prototype.var = function(nameOrStruct,value){
-	this.vars.set.apply(this.vars,arguments)
+req.prototype.var = function(name:string, value:any){
+	this.vars[name] = value
 	return this
 }
 
 
 req.prototype.getTransmissionOptions = function(){
-	var ops = this.options.data,
+	var ops = this.options,
 			headers = this.headers
 
 	/* headers */
-		Object.keys(headers.data).forEach(function(v,i){
-			ops.headers[v] = headers.data[v]
+		Object.keys(headers).forEach(function(v,i){
+			ops.headers[v] = headers[v]
 		})
 	/* end: headers */
 
 	/* cookies */
-		var cookies = this.cookies.data
-		var cookieString = ack.object(cookies).toCookieString()
+		var cookies = this.cookies
+		var cookieString = ackX.object(cookies).toCookieString()
 		if(cookieString.length){
 			ops.headers['Cookie'] = cookieString
 		}
@@ -151,31 +151,31 @@ req.prototype.getTransmissionOptions = function(){
 		}
 	}
 
-	if(Object.keys(this.posts.data).length){
+	if(Object.keys(this.posts).length){
 		ops.url = ops.uri//? this maybe just to report back to user the url ? Seems in the wrong place. Perhaps this is actually needed by request.post() ? (8/25/15)
-		ops.form = this.posts.data
-		//ops.formData = this.posts.data
+		ops.form = this.posts
+		//ops.formData = this.posts
 	}
 
-	ops.method = ops.method || (Object.keys(this.posts.data).length ? 'post' : 'get')
+	ops.method = ops.method || (Object.keys(this.posts).length ? 'post' : 'get')
 
 	return ops;
 }
 
 req.prototype.method = function(method){
-	this.options.data.method = method
+	this.options.method = method
 	return this
 }
 
 /** triggers request to send with method delete */
 req.prototype.delete = function(address){
-	this.options.data.method = 'del';
+	this.options.method = 'del';
 	return this.send(address)
 }
 
 /** triggers request to send with method post */
 req.prototype.post = function(dataOrAddress, data){
-	this.options.data.method = 'post';
+	this.options.method = 'post';
 
 	if(dataOrAddress && dataOrAddress.constructor == String){
 		if(data){
@@ -193,7 +193,7 @@ req.prototype.post = function(dataOrAddress, data){
 
 /** triggers request to send with method put */
 req.prototype.put = function(dataOrAddress, data){
-	this.options.data.method = 'put';
+	this.options.method = 'put';
 
 	if(dataOrAddress && dataOrAddress.constructor == String){
 		if(data){
@@ -230,7 +230,7 @@ req.prototype.send = function(address, options){
 
 	this.preSendOps(ops)
 
-	let promise = ack.promise().bind(this)
+	let promise = ackX.promise().bind(this)
 	.callback(function(callback){
 		req = request[ops.method.toLowerCase()](ops, callback)
 	})
@@ -258,8 +258,8 @@ req.prototype.preSendOps = function(ops){
 	/* url vars */
 		ops.path = ops.path || ''
 		var Uo = url.parse(ops.path,true)
-		for(var x in this.vars.data){
-			Uo.query[x] = this.vars.data[x]
+		for(var x in this.vars){
+			Uo.query[x] = this.vars[x]
 		}
 
 		var append = url.format(Uo)
@@ -299,6 +299,15 @@ req.prototype.procresreq = function(res, req, body){
 	return [body, res, req]
 }
 
-module.exports = function(urlOrScope){
+export function method(urlOrScope){
 	return new req(urlOrScope)
+}
+
+function setter(name:string|object, value:any, data){
+	if( name && name.constructor===String ){
+		data[ <string>name ] = value
+		return
+	}
+
+	Object.assign(data, name)
 }
