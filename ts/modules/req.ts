@@ -102,8 +102,17 @@ req.prototype.json = function(value){
 }
 
 /** add query var */
-req.prototype.var = function(name:string, value:any){
-	this.vars[name] = value
+req.prototype.var = function(
+	name   : string|object,
+	value? : any
+){
+	if( typeof(name)==="object" ){
+		for(let x in name){
+			this.vars[x] = name[x]
+		}
+	}else{
+		this.vars[name] = value
+	}
 	return this
 }
 

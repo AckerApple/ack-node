@@ -89,7 +89,14 @@ req.prototype.json = function (value) {
 };
 /** add query var */
 req.prototype["var"] = function (name, value) {
-    this.vars[name] = value;
+    if (typeof (name) === "object") {
+        for (var x in name) {
+            this.vars[x] = name[x];
+        }
+    }
+    else {
+        this.vars[name] = value;
+    }
     return this;
 };
 req.prototype.getTransmissionOptions = function () {
