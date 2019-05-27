@@ -2,8 +2,8 @@
 exports.__esModule = true;
 var req_1 = require("./reqres/req");
 var res_1 = require("./reqres/res");
-var ack = require('../index.js').ackX;
-function reqres(req, res, $scope) {
+var index_1 = require("../index");
+function Class(req, res, $scope) {
     if ($scope === void 0) { $scope = {}; }
     this.data = $scope;
     var iReq = new req_1.reqrtn(req, res);
@@ -33,16 +33,16 @@ function reqres(req, res, $scope) {
         return name ? module.get(name) : module;
     };
 }
-exports.reqres = reqres;
+exports.Class = Class;
 /* res */
 //closes request
-reqres.prototype.etag = function (string) {
+Class.prototype.etag = function (string) {
     var isJson = string === null || typeof string != 'string';
     if (isJson) {
-        var eTag = ack.etag(JSON.stringify(string));
+        var eTag = index_1.ackX.etag(JSON.stringify(string));
     }
     else {
-        var eTag = ack.etag(string);
+        var eTag = index_1.ackX.etag(string);
     }
     var res = this.res.res;
     var noMatchHead = this.input.header('If-None-Match');
@@ -56,67 +56,71 @@ reqres.prototype.etag = function (string) {
         this.res.abort(string);
     }
 };
-reqres.prototype.setStatus = function (code, message) {
+Class.prototype.setStatus = function (code, message) {
     this.res.res.statusCode = code;
     this.res.res.statusMessage = message;
     return this;
 };
 /* params storage string on response object that needs to be sent with closing request */
-reqres.prototype.output = function (anything) {
+Class.prototype.output = function (anything) {
     return this.res.append.apply(this.res, arguments);
 };
-reqres.prototype.dump = function (output, options) {
+Class.prototype.dump = function (output, options) {
     return this.res.dump(output, options);
 };
-reqres.prototype["throw"] = function (err) {
+Class.prototype["throw"] = function (err) {
     if (err && err.constructor == String) { //convert error string to error object with a more correct stack trace
         arguments[0] = new Error(arguments[0]);
-        ack.error(arguments[0]).cutFirstTrace();
+        index_1.ackX.error(arguments[0]).cutFirstTrace();
     }
     return this.res["throw"].apply(this.res, arguments);
 };
-reqres.prototype.relocate = function (url, statusMessage, statusCode) {
+Class.prototype.relocate = function (url, statusMessage, statusCode) {
     return this.res.relocate.apply(this.res, arguments);
 };
-reqres.prototype.sendHTML = function (output, options) {
+Class.prototype.sendHTML = function (output, options) {
     return this.res.sendHtml.apply(this.res, arguments);
 };
-reqres.prototype.sendHtml = reqres.prototype.sendHTML;
-reqres.prototype.sendJSON = function (output, options) {
+Class.prototype.sendHtml = Class.prototype.sendHTML;
+Class.prototype.sendJSON = function (output, options) {
     return this.res.sendJSON.apply(this.res, arguments);
 };
-reqres.prototype.sendJson = reqres.prototype.sendJSON;
-reqres.prototype.abort = function (output, options) {
+Class.prototype.sendJson = Class.prototype.sendJSON;
+Class.prototype.abort = function (output, options) {
     return this.res.abort.apply(this.res, arguments);
 };
-reqres.prototype.send = reqres.prototype.abort;
+Class.prototype.send = Class.prototype.abort;
 //has the response been put into HTML mode? default=acceptsHtml()
-reqres.prototype.isHtml = function (yN) {
+Class.prototype.isHtml = function (yN) {
     return this.res.isHtml(yN);
 };
 /* end: res */
 /* req */
-reqres.prototype.path = function () {
+Class.prototype.path = function () {
     return this.req.Path();
 };
-reqres.prototype.ip = function () {
+Class.prototype.ip = function () {
     return this.req.ip();
 };
-reqres.prototype.url = function () {
+Class.prototype.url = function () {
     return this.req.absoluteUrl();
 };
-reqres.prototype.acceptsHtml = function () {
+Class.prototype.acceptsHtml = function () {
     return this.req.acceptsHtml();
 };
-reqres.prototype.getHostName = function () {
+Class.prototype.getHostName = function () {
     return this.req.getHostName();
 };
-reqres.prototype.input = function (name) {
+Class.prototype.input = function (name) {
     var module = this.req.input().combined();
     return name ? module.get(name) : module;
 };
 /* end: req */
 function method(req, res) {
-    return new reqres(req, res);
+    return new Class(req, res);
 }
 exports.method = method;
+function reqres(req, res) {
+    return new Class(req, res);
+}
+exports.reqres = reqres;

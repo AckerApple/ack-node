@@ -1,22 +1,22 @@
-"use strict";
+const dump = require('nodedump')
+import { ackX as ack } from '../index'
+import * as etag from "etag"
+import { reqres } from './reqres'
 
-var ack = require('../index.js').ackX,
-    morgan = require('morgan'),
-    multer = require('multer'),
-    bodyParser = require('body-parser'),//used to parse inbound request form post variables
-    multiparty = require('multiparty'),//used to parse inbound request form multi/part post variables
-    cors = require('cors'),//controls cross origin requests
-    upj = require('ua-parser-js'),
-    connectTimeout = require("connect-timeout"),
-    compression = require('compression')
+import * as morgan from 'morgan'
+import * as multer from 'multer'
+import * as bodyParser from 'body-parser'//used to parse inbound request form post variables
+import * as multiparty from 'multiparty'//used to parse inbound request form multi/part post variables
+import * as cors from 'cors'//controls cross origin requests
+import * as upj from 'ua-parser-js'
+import * as connectTimeout from "connect-timeout"
+import * as compression from 'compression'
 
-var safeHeaders = ["Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Cache-Control", "Connection", "Content-Disposition", "Content-Encoding", "Content-Length", "Content-Type", "Cookie", "DNT", "Date", "Expires", "HTTP_CLIENT_IP", "HTTP_COMING_FROM", "HTTP_VIA", "Host", "If-Modified-Since", "Keep-Alive", "Origin", "Pragma", "REMOTE_ADDR", "Referer", "Server", "Set-Cookie", "Srv", "Transfer-Encoding", "User-Agent", "Vary", "X-Content-Type-Options", "X-CustomHeader", "X-DNS-Prefetch-Control", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Server", "X-Frame-Options", "X-Modified", "X-OTHER", "X-Originating-IP", "X-Output", "X-PING", "X-PINGOTHER", "X-Powered-By", "X-Real-IP", "X-Redirect", "X-Requested-With", "X-Robots-Tag", "X-XSS-Protection", "X-Xss-Protection"]
+export const safeHeaders = ["Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Cache-Control", "Connection", "Content-Disposition", "Content-Encoding", "Content-Length", "Content-Type", "Cookie", "DNT", "Date", "Expires", "HTTP_CLIENT_IP", "HTTP_COMING_FROM", "HTTP_VIA", "Host", "If-Modified-Since", "Keep-Alive", "Origin", "Pragma", "REMOTE_ADDR", "Referer", "Server", "Set-Cookie", "Srv", "Transfer-Encoding", "User-Agent", "Vary", "X-Content-Type-Options", "X-CustomHeader", "X-DNS-Prefetch-Control", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Server", "X-Frame-Options", "X-Modified", "X-OTHER", "X-Originating-IP", "X-Output", "X-PING", "X-PINGOTHER", "X-Powered-By", "X-Real-IP", "X-Redirect", "X-Requested-With", "X-Robots-Tag", "X-XSS-Protection", "X-Xss-Protection"]
 var isProNode = process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase()==='PRODUCTION'
 
-module.exports.safeHeaders = safeHeaders
-
 /** returns middleware that responds with a text/plain message of "User-agent: *\rDisallow: /" */
-module.exports.noRobots = function(){
+export const noRobots = function(){
   return function(req,res,next){
     res.header("Content-Type", "text/plain");
     res.end("User-agent: *\rDisallow: /")
@@ -24,7 +24,7 @@ module.exports.noRobots = function(){
 }
 
 /** returns middleware that sets cache-control header for every request */
-module.exports.cacheFor = function(seconds){
+export const cacheFor = function(seconds){
   return function(req, res, next) {
     res.setHeader('Cache-Control','public, max-age='+seconds)
     if(next)next();
@@ -32,9 +32,9 @@ module.exports.cacheFor = function(seconds){
 }
 
 /** returns middleware that throws 404 file not found errors */
-module.exports.notFound = function(msg){
+export const notFound = function(msg){
   return function(req, res, next) {
-    var reqres = ack.reqres(req,res)
+    var reqres = reqres(req,res)
     var reqPath = reqres.path().string
     var error = ack.error().types.notFound(msg || 'Not Found - '+reqPath)
 
@@ -47,14 +47,14 @@ module.exports.notFound = function(msg){
 }
 
 /** returns middleware that forces requests to timeout. Uses npm connect-timeout */
-module.exports.timeout = function(ms, options){
+export const timeout = function(ms, options){
   return connectTimeout(ms, options)
 }
 
 /** returns string to requests
   @string - string or object. Objects will be sent as JSON output. If function(req,res,next) then result of function will be sent 
 */
-module.exports.respond = function(string, options){
+export const respond = function(string, options){
   let isString = true
   let type = 'text/plain'
   let eTag = ''
@@ -83,11 +83,11 @@ module.exports.respond = function(string, options){
   }
 
   if(isString){
-    eTag = ack.etag(string)
+    eTag = etag(string)
   }
 
   return function(req,res,next){
-    var noMatchHead = ack.reqres(req,res).input.header('If-None-Match')
+    var noMatchHead = reqres(req,res).input.header('If-None-Match')
     return getter(req,res,next)
     .then(toSend=>{
       if(noMatchHead == toSend.etag){
@@ -106,7 +106,7 @@ module.exports.respond = function(string, options){
 }
 
 /** returns middleware that GZIP requests. See npm compression */
-module.exports.compress = function(options){
+export const compress = function(options){
   return compression(options)
 }
 
@@ -118,7 +118,7 @@ module.exports.compress = function(options){
     allowedHeaders:module.exports.safeHeaders//headers server is allowed to receive
   }
 */
-module.exports.cors = function(options){
+export const cors = function(options){
   options = options || {}
   options.maxAge = options.maxAge==null ? 3000 : options.maxAge//prevent subsequent OPTIONS requests via cache
   options.exposedHeaders=options.exposedHeaders||safeHeaders
@@ -127,14 +127,14 @@ module.exports.cors = function(options){
 }
 
 /** return middleware that pushes requests to a new url */
-module.exports.relocate = function(url){
+export const relocate = function(url){
   return function(req, res, next){
-    ack.reqres(req, res).relocate(url)
+    reqres(req, res).relocate(url)
   }
 }
 
 /** returns middleware that 404s requests matching typical fav.ico files */
-module.exports.ignoreFavors = function(statusCode){
+export const ignoreFavors = function(statusCode){
   statusCode = statusCode || 404
   return function(req, res, next) {
     if(/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)){
@@ -146,7 +146,7 @@ module.exports.ignoreFavors = function(statusCode){
     }
   }
 }
-module.exports.ignoreFavIcon = module.exports.ignoreFavors
+export const ignoreFavIcon = ignoreFavors
 
 /** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors. Params datetime key of errors.
   @options{
@@ -154,16 +154,16 @@ module.exports.ignoreFavIcon = module.exports.ignoreFavors
     maxLength:25
   }
 */
-module.exports.errorsToArray = function(options){
-  const handler = errorsToArray(options)
-  return module.exports.errorCallback( handler )
+export const errorsToArray = function(options){
+  const handler = errorsToArrayMaker(options)
+  return errorCallback( handler )
 }
 
-module.exports.handlers = {
+export const handlers = {
   errorsToArray:errorsToArray
 }
 
-function errorsToArray(options){
+function errorsToArrayMaker(options){
   options = options || {}
   options.array = options.array || []
   options.maxLength = options.maxLength || 25
@@ -178,7 +178,7 @@ function errorsToArray(options){
 /** returns error middleware(err,req,res,next) that when called, calls callback
   - Error middleware returns void
 */
-module.exports.errorCallback = function(callback){
+export const errorCallback = function(callback){
   return function(err, req, res, next){
     callback(err, req, res)
     if(next)next(err)
@@ -187,7 +187,7 @@ module.exports.errorCallback = function(callback){
 
 function upgradeServerError(err, req, res){
   const recErr = Object.assign({}, err)
-  const reqres = ack.reqres(req, res)
+  const rr = reqres(req, res)
   
   //capture hidden error properties
   const keys = Object.getOwnPropertyNames(err)
@@ -204,11 +204,11 @@ function upgradeServerError(err, req, res){
   recErr.server = {
     datetime:ack.date().now().mmddyyyyhhmmtt(),
     req:{
-      ip      : reqres.ip(),
+      ip      : rr.ip(),
       method  : req.method,
       headers : req.headers,
-      https   : reqres.req.isHttps(),
-      url     : reqres.req.absoluteUrl(),
+      https   : rr.req.isHttps(),
+      url     : rr.req.absoluteUrl(),
       query   : req.query
     }
   }
@@ -228,9 +228,9 @@ function arrayPrependServerError(array, err, options){
 /** returns middleware that closes errors with crucial details needed during development
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.closeDevErrors = function(){
+export const closeDevErrors = function(){
   return function(err, req, res, next){
-    var isHtml = ack.reqres(req,res).isHtml()
+    var isHtml = reqres(req,res).isHtml()
 
     if( isHtml ){
       htmlCloseError({debug:true})(err,req,res)
@@ -245,7 +245,7 @@ module.exports.closeDevErrors = function(){
 /** returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.closeProductionErrors = function(){
+export const closeProductionErrors = function(){
   return function processError(err, req, res, next){
     try{
       var rtn = {
@@ -271,7 +271,7 @@ module.exports.closeProductionErrors = function(){
 /** returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.consoleNonProductionErrors = function(options){
+export const consoleNonProductionErrors = function(options){
   if(isProNode){
     return function(req,res,next){
       next()
@@ -289,10 +289,10 @@ module.exports.consoleNonProductionErrors = function(options){
 }
 
 /** returns middleware that upgrades a url variable into an Authorization header */
-module.exports.urlVarAsAuthHeader = function(varName){
+export const urlVarAsAuthHeader = function(varName){
   return function(req, res, next){
     try{
-        var inputVar = ack.reqres(req,res).input.url(varName)
+        var inputVar = reqres(req,res).input.url(varName)
         if(inputVar){
           inputVar = decodeURIComponent(inputVar)//remove url formatting
           req.headers.authorization = 'Bearer '+inputVar;//make available as the Authorization header
@@ -305,10 +305,10 @@ module.exports.urlVarAsAuthHeader = function(varName){
 }
 
 /** returns middleware that upgrades a cookie variable into an Authorization header */
-module.exports.cookieAsAuthHeader = function(varName){
+export const cookieAsAuthHeader = function(varName){
   return function(req, res, next){
     try{
-        var inputVar = ack.reqres(req,res).input.cookie(varName)
+        var inputVar = reqres(req,res).input.cookie(varName)
         if(inputVar){
           inputVar = decodeURIComponent(inputVar)//remove url formatting
           req.headers.authorization = 'Bearer '+inputVar;//make available as the Authorization header
@@ -325,7 +325,7 @@ module.exports.cookieAsAuthHeader = function(varName){
     requestKeyName: 'auth'//where parsed data will live (aka as requestProperty)
   }
 */
-module.exports.jwt = function(secret,options){
+export const jwt = function(secret,options){
   options = options || {}
   options.requestKeyName = options.requestKeyName || options.requestProperty || 'auth'
 
@@ -333,7 +333,7 @@ module.exports.jwt = function(secret,options){
   var expireError = ack.error().types.unauthorized('session has expired')
 
   return function(req,res,next){
-    var authBearer = ack.reqres(req,res).req.input().getAuthBearer()
+    var authBearer = reqres(req,res).req.input().getAuthBearer()
     if(!authBearer){
       return next( unauthError )
     }
@@ -366,7 +366,7 @@ module.exports.jwt = function(secret,options){
     stream - Output stream for writing log lines, defaults to process.stdout
   }
 */
-module.exports.logging = function(format,options){
+export const logging = function(format,options){
   format = format || getMorganDefaultFormat(options)
 
   return morgan(format,options)
@@ -389,7 +389,7 @@ function getMorganDefaultFormat(options, add?){
     maxLength:100
   }
 */
-module.exports.logToArray = function(options){
+export const logToArray = function(options){
   options = Object.assign({}, options)//clone n param ops
   var array = options.array || []
   delete options.array
@@ -400,24 +400,24 @@ module.exports.logToArray = function(options){
     }
   }
   var format = options.format || getMorganDefaultFormat(options,'[:date[web]]')
-  return module.exports.logging(format,options)
+  return logging(format,options)
 }
 
 /** returns middleware that uploads files. Creates req.files array
   @options - see function paramUploadOptions
 */
-module.exports.uploadByName = function(name, options){
+export const uploadByName = function(name, options){
   options = paramUploadOptions(options)
   return multer(options).array(name)
 }
 
 /** returns middleware that throws 405 errors on request */
-module.exports.methodNotAllowed = function(message){
+export const methodNotAllowed = function(message){
   return this.throw( ack.error().types.methodNotAllowed(message) )
 }
 
 /** returns middleware that throws 400 errors on request */
-module.exports.throw = function(ErrorOrMessage){
+export const throwMidware = function(ErrorOrMessage){
   if(ErrorOrMessage){
     if(ErrorOrMessage.constructor==String){
       ErrorOrMessage = ack.error().types.badRequest(ErrorOrMessage)
@@ -430,7 +430,7 @@ module.exports.throw = function(ErrorOrMessage){
     if(next){//this router doesn't have to be used with express or connect packages which employ the next method
       next( ErrorOrMessage )
     }else{
-      ack.reqres(req,res).throw(ErrorOrMessage)
+      reqres(req,res).throw(ErrorOrMessage)
     }
   }
 }
@@ -441,7 +441,7 @@ module.exports.throw = function(ErrorOrMessage){
     limit:102400//max bytes for body
   }
 */
-module.exports.parseBody = function(options){
+export const parseBody = function(options){
   options = options || {}
   
   const urlOps = Object.assign({extended:true}, options)
@@ -478,10 +478,10 @@ module.exports.parseBody = function(options){
 /** returns middleware that parse multi-part requests. Creates request.body which contains all form post fields
   NOTE: Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
 */
-module.exports.parseMultipartFields = function(){
+export const parseMultipartFields = function(){
   var form = new multiparty.Form()
   return function(req,res,next){
-    var isMulti = ack.reqres(req,res).req.isMultipart()
+    var isMulti = reqres(req,res).req.isMultipart()
 
     if(!isMulti)return next();
 
@@ -505,11 +505,11 @@ module.exports.parseMultipartFields = function(){
     - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
     - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadOneByName = function(name, options){
+export const uploadOneByName = function(name, options){
   options = paramUploadOptions(options)
   const uploader = multer(options).single(name)
 
-  return function(req,res,next){
+  return function(req,res,next?){
     var promise = ack.promise()
     .callback(function(callback){
       uploader(req,res,callback)
@@ -529,12 +529,12 @@ module.exports.uploadOneByName = function(name, options){
     - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
     - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadOneByNameToPath = function(name, path, options){
+export const uploadOneByNameToPath = function(name, path, options){
   options = paramUploadOptions(options)
   var isLikeFile = ack.path(path).isLikeFile()
 
   return function(req,res,next){
-    var promise = module.exports.uploadOneByName(name,options)(req,res)
+    var promise = uploadOneByName(name,options)(req,res)
     .then(function(){
       const ackPath = ack.path(path)
             
@@ -557,16 +557,16 @@ module.exports.uploadOneByNameToPath = function(name, path, options){
   - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
   - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadArrayByName = function(name, options){
+export const uploadArrayByName = function(name, options){
   options = paramUploadOptions(options)
   return multer(options).array(name)
 }
 
 /** returns middleware that only allows local network requests */
-module.exports.localNetworkOnly = function(message){
+export const localNetworkOnly = function(message){
   var LocalNetworkRequired = new ack.error().types.LocalNetworkRequired
   return function(req,res,next){
-    var isLocalNetwork = ack.reqres(req,res).req.isLocalNetwork()
+    var isLocalNetwork = reqres(req,res).req.isLocalNetwork()
 
     if(!isLocalNetwork){
       next( new LocalNetworkRequired(message) )
@@ -575,11 +575,6 @@ module.exports.localNetworkOnly = function(message){
     next()
   }
 }
-
-//MODULES AS INLINE FUNCTIONS
-module.exports.htmlCloseError = htmlCloseError
-module.exports.jsonCloseError = jsonCloseError
-
 
 
 
@@ -624,13 +619,13 @@ morgan.token('colored-method',function(req,res){
 })
 
 morgan.token('browser-name',function(req,res){
-  var userAgent = ack.reqres(req,res).input.header('User-Agent')
+  var userAgent = reqres(req,res).input.header('User-Agent')
   var parsed = upj(userAgent)
   return parsed.browser.name
 })
 
 morgan.token('device-name',function(req,res){
-  var userAgent = ack.reqres(req,res).input.header('User-Agent')
+  var userAgent = reqres(req,res).input.header('User-Agent')
   var parsed = upj(userAgent)
   return parsed.device.name
 })
@@ -662,7 +657,7 @@ morgan.token('colored-status',function(req,res){
 /** Returns universal error handler middleware
   @options {debug:true/false, debugLocalNetwork:true}
 */
-function htmlCloseError(options){
+export function htmlCloseError(options){
   options = options || {}
   options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
   return function(err, req, res, next?){
@@ -672,7 +667,7 @@ function htmlCloseError(options){
     res.setHeader('Content-Type','text/html')
     if(msg)res.setHeader('message', cleanStatusMessage(msg))
     var output = '<h3>'+msg+'</h3>'//message meat
-    var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork());
+    var isDebug = options.debug || (options.debugLocalNetwork && reqres(req,res).req.isLocalNetwork());
     var dump = null
 
     if(isDebug){
@@ -686,7 +681,7 @@ function htmlCloseError(options){
       dump = err
     }
 
-    output += ack(dump).dump('html')
+    output += dump('html')
     res.end(output)
   }
 }
@@ -709,7 +704,7 @@ function toError(err){
 /** returns middleware that handles errors with JSON style details
   @options {debug:true/false, debugLocalNetwork:true}
 */
-function jsonCloseError( options:any={} ){
+export function jsonCloseError( options:any={} ){
   options.debugLocalNetwork = options.debugLocalNetwork==null ? true : options.debugLocalNetwork
   return function(err, req, res, next?){
     try{
@@ -733,7 +728,7 @@ function jsonCloseError( options:any={} ){
         }
       }
 
-      var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req,res).req.isLocalNetwork()));
+      var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && reqres(req,res).req.isLocalNetwork()));
       if(isDebug){
         rtn.error["stack"] = err.stack//debug requests will get stack traces
       }

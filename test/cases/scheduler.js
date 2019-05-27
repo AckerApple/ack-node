@@ -5,25 +5,35 @@ var path = require('path')
 describe('ackTask',function(){
 	this.timeout(4000)
 
-	it('#pathEveryMil',function(done){
+	let mySchedule
+
+	it.skip('#pathEveryMil',function(done){
 		var fp = path.join(__dirname,'../','assets','modules','logNumber1.js')
 		var fileResultReader = function(result){
 			result = result.trim()
 			var lineArray = result.split(new RegExp('\r\n|\r|\n', 'gi'))
 			if(lineArray.length!=10){
+				if( mySchedule ){
+					mySchedule.cancel()
+				}
 				throw new Error(ackTask.data.logFilePath+' log did not contain 10 lines. Got '+lineArray.length+' : '+result)
 			}
 		}
 
 		var repeater = function(promise, schedule, index){//intended to run after every run
-			return promise.bind(this)
-			.then(function(result,schedule){
+			mySchedule = schedule
+			return promise
+			.then((...args)=>{
+				const result = args[0]
+
 				if(result!=1){
 					return done(new Error('logNumber1.js did not return number 1. Got '+result))
 				}
 				if(index==5){
 					schedule.cancel()
-					return this.getLogFile().readAsString().then(fileResultReader).then(done).catch(done)
+					return this.getLogFile().readAsString()
+					.then(fileResultReader)
+					.then(done).catch(done)
 				}
 			})
 			.catch(done)
@@ -31,7 +41,12 @@ describe('ackTask',function(){
 
 		ackTask.getLogFile().delete()
 		.then(function(){
-			return ackTask.pathEveryMil(fp, 20, repeater)
+			const scheduler = ackTask.pathEveryMil(fp, 60, repeater)
+			
+			//safe gaurd
+			setTimeout(()=>scheduler.cancel(), 1000)
+			
+			return scheduler
 		})
 		.catch(done)
 	})

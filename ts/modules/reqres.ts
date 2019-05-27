@@ -1,9 +1,9 @@
 import { reqrtn as Req } from "./reqres/req"
 import { reqres as Res } from "./reqres/res"
 
-var ack = require('../index.js').ackX
+import { ackX as ack } from '../index'
 
-export function reqres(req, res, $scope={}){
+export function Class(req, res, $scope={}){
 	this.data = $scope
 
 	var iReq = new Req(req, res)
@@ -39,7 +39,7 @@ export function reqres(req, res, $scope={}){
 
 /* res */
 	//closes request
-	reqres.prototype.etag = function(string){
+	Class.prototype.etag = function(string){
 		var isJson = string===null || typeof string!='string';
 
 		if(isJson){
@@ -62,22 +62,22 @@ export function reqres(req, res, $scope={}){
 		}
 	}
 
-	reqres.prototype.setStatus = function(code, message){
+	Class.prototype.setStatus = function(code, message){
 		this.res.res.statusCode = code
 		this.res.res.statusMessage = message
 		return this
 	}
 
 	/* params storage string on response object that needs to be sent with closing request */
-	reqres.prototype.output = function(anything){
+	Class.prototype.output = function(anything){
 		return this.res.append.apply(this.res,arguments)
 	}
 
-	reqres.prototype.dump = function(output, options){
+	Class.prototype.dump = function(output, options){
 		return this.res.dump(output, options)
 	}
 
-	reqres.prototype.throw = function(err){
+	Class.prototype.throw = function(err){
 		if(err && err.constructor==String){//convert error string to error object with a more correct stack trace
 			arguments[0] = new Error(arguments[0])
 			ack.error(arguments[0]).cutFirstTrace()
@@ -85,59 +85,63 @@ export function reqres(req, res, $scope={}){
 		return this.res.throw.apply(this.res,arguments)
 	}
 
-	reqres.prototype.relocate = function(url, statusMessage, statusCode){
+	Class.prototype.relocate = function(url, statusMessage, statusCode){
 		return this.res.relocate.apply(this.res,arguments)
 	}
 
 
-	reqres.prototype.sendHTML = function(output, options){
+	Class.prototype.sendHTML = function(output, options){
 		return this.res.sendHtml.apply(this.res,arguments)
 	}
-	reqres.prototype.sendHtml = reqres.prototype.sendHTML
+	Class.prototype.sendHtml = Class.prototype.sendHTML
 
-	reqres.prototype.sendJSON = function(output, options){
+	Class.prototype.sendJSON = function(output, options){
 		return this.res.sendJSON.apply(this.res,arguments)
 	}
-	reqres.prototype.sendJson = reqres.prototype.sendJSON
+	Class.prototype.sendJson = Class.prototype.sendJSON
 
-	reqres.prototype.abort = function(output, options){
+	Class.prototype.abort = function(output, options){
 		return this.res.abort.apply(this.res,arguments)
 	}
-	reqres.prototype.send = reqres.prototype.abort
+	Class.prototype.send = Class.prototype.abort
 
 	//has the response been put into HTML mode? default=acceptsHtml()
-	reqres.prototype.isHtml = function(yN){
+	Class.prototype.isHtml = function(yN){
 		return this.res.isHtml(yN)
 	}
 /* end: res */
 
 /* req */
-	reqres.prototype.path = function(){
+	Class.prototype.path = function(){
 		return this.req.Path()
 	}
 
-	reqres.prototype.ip = function(){
+	Class.prototype.ip = function(){
 		return this.req.ip()
 	}
 
-	reqres.prototype.url = function(){
+	Class.prototype.url = function(){
 		return this.req.absoluteUrl()
 	}
 
-	reqres.prototype.acceptsHtml = function(){
+	Class.prototype.acceptsHtml = function(){
 		return this.req.acceptsHtml()
 	}
 
-	reqres.prototype.getHostName = function(){
+	Class.prototype.getHostName = function(){
 		return this.req.getHostName()
 	}
 
-	reqres.prototype.input = function(name){
+	Class.prototype.input = function(name){
 		var module = this.req.input().combined()
 		return name ? module.get(name) : module
 	}
 /* end: req */
 
 export function method(req, res){
-	return new reqres(req, res)
+	return new Class(req, res)
+}
+
+export function reqres(req, res){
+	return new Class(req, res)
 }

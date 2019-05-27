@@ -1,20 +1,28 @@
 "use strict";
-var ack = require('../index.js').ackX, morgan = require('morgan'), multer = require('multer'), bodyParser = require('body-parser'), //used to parse inbound request form post variables
-multiparty = require('multiparty'), //used to parse inbound request form multi/part post variables
-cors = require('cors'), //controls cross origin requests
-upj = require('ua-parser-js'), connectTimeout = require("connect-timeout"), compression = require('compression');
-var safeHeaders = ["Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Cache-Control", "Connection", "Content-Disposition", "Content-Encoding", "Content-Length", "Content-Type", "Cookie", "DNT", "Date", "Expires", "HTTP_CLIENT_IP", "HTTP_COMING_FROM", "HTTP_VIA", "Host", "If-Modified-Since", "Keep-Alive", "Origin", "Pragma", "REMOTE_ADDR", "Referer", "Server", "Set-Cookie", "Srv", "Transfer-Encoding", "User-Agent", "Vary", "X-Content-Type-Options", "X-CustomHeader", "X-DNS-Prefetch-Control", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Server", "X-Frame-Options", "X-Modified", "X-OTHER", "X-Originating-IP", "X-Output", "X-PING", "X-PINGOTHER", "X-Powered-By", "X-Real-IP", "X-Redirect", "X-Requested-With", "X-Robots-Tag", "X-XSS-Protection", "X-Xss-Protection"];
+exports.__esModule = true;
+var dump = require('nodedump');
+var index_1 = require("../index");
+var etag = require("etag");
+var reqres_1 = require("./reqres");
+var morgan = require("morgan");
+var multer = require("multer");
+var bodyParser = require("body-parser"); //used to parse inbound request form post variables
+var multiparty = require("multiparty"); //used to parse inbound request form multi/part post variables
+var cors = require("cors"); //controls cross origin requests
+var upj = require("ua-parser-js");
+var connectTimeout = require("connect-timeout");
+var compression = require("compression");
+exports.safeHeaders = ["Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age", "Access-Control-Request-Headers", "Access-Control-Request-Method", "Cache-Control", "Connection", "Content-Disposition", "Content-Encoding", "Content-Length", "Content-Type", "Cookie", "DNT", "Date", "Expires", "HTTP_CLIENT_IP", "HTTP_COMING_FROM", "HTTP_VIA", "Host", "If-Modified-Since", "Keep-Alive", "Origin", "Pragma", "REMOTE_ADDR", "Referer", "Server", "Set-Cookie", "Srv", "Transfer-Encoding", "User-Agent", "Vary", "X-Content-Type-Options", "X-CustomHeader", "X-DNS-Prefetch-Control", "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Server", "X-Frame-Options", "X-Modified", "X-OTHER", "X-Originating-IP", "X-Output", "X-PING", "X-PINGOTHER", "X-Powered-By", "X-Real-IP", "X-Redirect", "X-Requested-With", "X-Robots-Tag", "X-XSS-Protection", "X-Xss-Protection"];
 var isProNode = process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase() === 'PRODUCTION';
-module.exports.safeHeaders = safeHeaders;
 /** returns middleware that responds with a text/plain message of "User-agent: *\rDisallow: /" */
-module.exports.noRobots = function () {
+exports.noRobots = function () {
     return function (req, res, next) {
         res.header("Content-Type", "text/plain");
         res.end("User-agent: *\rDisallow: /");
     };
 };
 /** returns middleware that sets cache-control header for every request */
-module.exports.cacheFor = function (seconds) {
+exports.cacheFor = function (seconds) {
     return function (req, res, next) {
         res.setHeader('Cache-Control', 'public, max-age=' + seconds);
         if (next)
@@ -22,11 +30,11 @@ module.exports.cacheFor = function (seconds) {
     };
 };
 /** returns middleware that throws 404 file not found errors */
-module.exports.notFound = function (msg) {
+exports.notFound = function (msg) {
     return function (req, res, next) {
-        var reqres = ack.reqres(req, res);
+        var reqres = reqres(req, res);
         var reqPath = reqres.path().string;
-        var error = ack.error().types.notFound(msg || 'Not Found - ' + reqPath);
+        var error = index_1.ackX.error().types.notFound(msg || 'Not Found - ' + reqPath);
         if (next) {
             next(error);
         }
@@ -36,13 +44,13 @@ module.exports.notFound = function (msg) {
     };
 };
 /** returns middleware that forces requests to timeout. Uses npm connect-timeout */
-module.exports.timeout = function (ms, options) {
+exports.timeout = function (ms, options) {
     return connectTimeout(ms, options);
 };
 /** returns string to requests
   @string - string or object. Objects will be sent as JSON output. If function(req,res,next) then result of function will be sent
 */
-module.exports.respond = function (string, options) {
+exports.respond = function (string, options) {
     var isString = true;
     var type = 'text/plain';
     var eTag = '';
@@ -70,10 +78,10 @@ module.exports.respond = function (string, options) {
         string = JSON.stringify(string);
     }
     if (isString) {
-        eTag = ack.etag(string);
+        eTag = etag(string);
     }
     return function (req, res, next) {
-        var noMatchHead = ack.reqres(req, res).input.header('If-None-Match');
+        var noMatchHead = reqres_1.reqres(req, res).input.header('If-None-Match');
         return getter(req, res, next)
             .then(function (toSend) {
             if (noMatchHead == toSend.etag) {
@@ -91,7 +99,7 @@ module.exports.respond = function (string, options) {
     };
 };
 /** returns middleware that GZIP requests. See npm compression */
-module.exports.compress = function (options) {
+exports.compress = function (options) {
     return compression(options);
 };
 /** returns middleware for cross orgin services
@@ -102,21 +110,21 @@ module.exports.compress = function (options) {
     allowedHeaders:module.exports.safeHeaders//headers server is allowed to receive
   }
 */
-module.exports.cors = function (options) {
+exports.cors = function (options) {
     options = options || {};
     options.maxAge = options.maxAge == null ? 3000 : options.maxAge; //prevent subsequent OPTIONS requests via cache
-    options.exposedHeaders = options.exposedHeaders || safeHeaders;
-    options.allowedHeaders = options.allowedHeaders || safeHeaders;
-    return cors(options);
+    options.exposedHeaders = options.exposedHeaders || exports.safeHeaders;
+    options.allowedHeaders = options.allowedHeaders || exports.safeHeaders;
+    return exports.cors(options);
 };
 /** return middleware that pushes requests to a new url */
-module.exports.relocate = function (url) {
+exports.relocate = function (url) {
     return function (req, res, next) {
-        ack.reqres(req, res).relocate(url);
+        reqres_1.reqres(req, res).relocate(url);
     };
 };
 /** returns middleware that 404s requests matching typical fav.ico files */
-module.exports.ignoreFavors = function (statusCode) {
+exports.ignoreFavors = function (statusCode) {
     statusCode = statusCode || 404;
     return function (req, res, next) {
         if (/\/favicon\.?(jpe?g|png|ico|gif)?$/i.test(req.url)) {
@@ -129,21 +137,21 @@ module.exports.ignoreFavors = function (statusCode) {
         }
     };
 };
-module.exports.ignoreFavIcon = module.exports.ignoreFavors;
+exports.ignoreFavIcon = exports.ignoreFavors;
 /** routes errors onto an array of a specified maxLength. Great for just sending error to report servers errors. Params datetime key of errors.
   @options{
     array:[],
     maxLength:25
   }
 */
-module.exports.errorsToArray = function (options) {
-    var handler = errorsToArray(options);
-    return module.exports.errorCallback(handler);
+exports.errorsToArray = function (options) {
+    var handler = errorsToArrayMaker(options);
+    return exports.errorCallback(handler);
 };
-module.exports.handlers = {
-    errorsToArray: errorsToArray
+exports.handlers = {
+    errorsToArray: exports.errorsToArray
 };
-function errorsToArray(options) {
+function errorsToArrayMaker(options) {
     options = options || {};
     options.array = options.array || [];
     options.maxLength = options.maxLength || 25;
@@ -157,7 +165,7 @@ function errorsToArray(options) {
 /** returns error middleware(err,req,res,next) that when called, calls callback
   - Error middleware returns void
 */
-module.exports.errorCallback = function (callback) {
+exports.errorCallback = function (callback) {
     return function (err, req, res, next) {
         callback(err, req, res);
         if (next)
@@ -166,7 +174,7 @@ module.exports.errorCallback = function (callback) {
 };
 function upgradeServerError(err, req, res) {
     var recErr = Object.assign({}, err);
-    var reqres = ack.reqres(req, res);
+    var rr = reqres_1.reqres(req, res);
     //capture hidden error properties
     var keys = Object.getOwnPropertyNames(err);
     keys.forEach(function (key) {
@@ -178,13 +186,13 @@ function upgradeServerError(err, req, res) {
     //todo: record IP address error occurred on. Record url-path, method, device-name, browser-name.
     //todo: add options to enable/disable error details
     recErr.server = {
-        datetime: ack.date().now().mmddyyyyhhmmtt(),
+        datetime: index_1.ackX.date().now().mmddyyyyhhmmtt(),
         req: {
-            ip: reqres.ip(),
+            ip: rr.ip(),
             method: req.method,
             headers: req.headers,
-            https: reqres.req.isHttps(),
-            url: reqres.req.absoluteUrl(),
+            https: rr.req.isHttps(),
+            url: rr.req.absoluteUrl(),
             query: req.query
         }
     };
@@ -199,9 +207,9 @@ function arrayPrependServerError(array, err, options) {
 /** returns middleware that closes errors with crucial details needed during development
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.closeDevErrors = function () {
+exports.closeDevErrors = function () {
     return function (err, req, res, next) {
-        var isHtml = ack.reqres(req, res).isHtml();
+        var isHtml = reqres_1.reqres(req, res).isHtml();
         if (isHtml) {
             htmlCloseError({ debug: true })(err, req, res);
         }
@@ -215,7 +223,7 @@ module.exports.closeDevErrors = function () {
 /** returns middleware that conditions errors returned to provide useful responses without exact detail specifics on excepetions thrown
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.closeProductionErrors = function () {
+exports.closeProductionErrors = function () {
     return function processError(err, req, res, next) {
         try {
             var rtn = {
@@ -240,7 +248,7 @@ module.exports.closeProductionErrors = function () {
 /** returns middleware that conditions errors returned to provide useful responses with exact detail specifics on excepetions thrown
     hint: must be last middleware AFTER routes that MAY have an error
 */
-module.exports.consoleNonProductionErrors = function (options) {
+exports.consoleNonProductionErrors = function (options) {
     if (isProNode) {
         return function (req, res, next) {
             next();
@@ -248,7 +256,7 @@ module.exports.consoleNonProductionErrors = function (options) {
     }
     return function (err, req, res, next) {
         console.error('\x1b[33m---DEV REQUEST ERROR ---\x1b[00m');
-        var jErr = ack.error(err);
+        var jErr = index_1.ackX.error(err);
         console.error(err);
         var shortTrace = jErr.getTraceArray(6);
         if (shortTrace && shortTrace.length)
@@ -257,10 +265,10 @@ module.exports.consoleNonProductionErrors = function (options) {
     };
 };
 /** returns middleware that upgrades a url variable into an Authorization header */
-module.exports.urlVarAsAuthHeader = function (varName) {
+exports.urlVarAsAuthHeader = function (varName) {
     return function (req, res, next) {
         try {
-            var inputVar = ack.reqres(req, res).input.url(varName);
+            var inputVar = reqres_1.reqres(req, res).input.url(varName);
             if (inputVar) {
                 inputVar = decodeURIComponent(inputVar); //remove url formatting
                 req.headers.authorization = 'Bearer ' + inputVar; //make available as the Authorization header
@@ -273,10 +281,10 @@ module.exports.urlVarAsAuthHeader = function (varName) {
     };
 };
 /** returns middleware that upgrades a cookie variable into an Authorization header */
-module.exports.cookieAsAuthHeader = function (varName) {
+exports.cookieAsAuthHeader = function (varName) {
     return function (req, res, next) {
         try {
-            var inputVar = ack.reqres(req, res).input.cookie(varName);
+            var inputVar = reqres_1.reqres(req, res).input.cookie(varName);
             if (inputVar) {
                 inputVar = decodeURIComponent(inputVar); //remove url formatting
                 req.headers.authorization = 'Bearer ' + inputVar; //make available as the Authorization header
@@ -293,17 +301,17 @@ module.exports.cookieAsAuthHeader = function (varName) {
     requestKeyName: 'auth'//where parsed data will live (aka as requestProperty)
   }
 */
-module.exports.jwt = function (secret, options) {
+exports.jwt = function (secret, options) {
     options = options || {};
     options.requestKeyName = options.requestKeyName || options.requestProperty || 'auth';
-    var unauthError = ack.error().types.unauthorized();
-    var expireError = ack.error().types.unauthorized('session has expired');
+    var unauthError = index_1.ackX.error().types.unauthorized();
+    var expireError = index_1.ackX.error().types.unauthorized('session has expired');
     return function (req, res, next) {
-        var authBearer = ack.reqres(req, res).req.input().getAuthBearer();
+        var authBearer = reqres_1.reqres(req, res).req.input().getAuthBearer();
         if (!authBearer) {
             return next(unauthError);
         }
-        var jwt = ack.jwt(authBearer, secret, options);
+        var jwt = index_1.ackX.jwt(authBearer, secret, options);
         /* check expiration */
         var jwtData = jwt.decode();
         if (jwt.isExpireDefined()) {
@@ -327,7 +335,7 @@ module.exports.jwt = function (secret, options) {
     stream - Output stream for writing log lines, defaults to process.stdout
   }
 */
-module.exports.logging = function (format, options) {
+exports.logging = function (format, options) {
     format = format || getMorganDefaultFormat(options);
     return morgan(format, options);
 };
@@ -347,7 +355,7 @@ function getMorganDefaultFormat(options, add) {
     maxLength:100
   }
 */
-module.exports.logToArray = function (options) {
+exports.logToArray = function (options) {
     options = Object.assign({}, options); //clone n param ops
     var array = options.array || [];
     delete options.array;
@@ -358,35 +366,35 @@ module.exports.logToArray = function (options) {
         }
     };
     var format = options.format || getMorganDefaultFormat(options, '[:date[web]]');
-    return module.exports.logging(format, options);
+    return exports.logging(format, options);
 };
 /** returns middleware that uploads files. Creates req.files array
   @options - see function paramUploadOptions
 */
-module.exports.uploadByName = function (name, options) {
+exports.uploadByName = function (name, options) {
     options = paramUploadOptions(options);
     return multer(options).array(name);
 };
 /** returns middleware that throws 405 errors on request */
-module.exports.methodNotAllowed = function (message) {
-    return this["throw"](ack.error().types.methodNotAllowed(message));
+exports.methodNotAllowed = function (message) {
+    return this["throw"](index_1.ackX.error().types.methodNotAllowed(message));
 };
 /** returns middleware that throws 400 errors on request */
-module.exports["throw"] = function (ErrorOrMessage) {
+exports.throwMidware = function (ErrorOrMessage) {
     if (ErrorOrMessage) {
         if (ErrorOrMessage.constructor == String) {
-            ErrorOrMessage = ack.error().types.badRequest(ErrorOrMessage);
+            ErrorOrMessage = index_1.ackX.error().types.badRequest(ErrorOrMessage);
         }
     }
     else {
-        ErrorOrMessage = ack.error().types.badRequest();
+        ErrorOrMessage = index_1.ackX.error().types.badRequest();
     }
     return function (req, res, next) {
         if (next) { //this router doesn't have to be used with express or connect packages which employ the next method
             next(ErrorOrMessage);
         }
         else {
-            ack.reqres(req, res)["throw"](ErrorOrMessage);
+            reqres_1.reqres(req, res)["throw"](ErrorOrMessage);
         }
     };
 };
@@ -396,7 +404,7 @@ module.exports["throw"] = function (ErrorOrMessage) {
     limit:102400//max bytes for body
   }
 */
-module.exports.parseBody = function (options) {
+exports.parseBody = function (options) {
     options = options || {};
     var urlOps = Object.assign({ extended: true }, options);
     var urlEncoder = bodyParser.urlencoded(urlOps);
@@ -404,7 +412,7 @@ module.exports.parseBody = function (options) {
     var jsonOps = Object.assign({ type: 'application/vnd.api+json' }, options);
     var jsonParser = bodyParser.json(jsonOps);
     return function (req, res, next) {
-        var promise = ack.promise()
+        var promise = index_1.ackX.promise()
             .callback(function (callback) {
             urlEncoder(req, res, callback);
         })
@@ -416,7 +424,7 @@ module.exports.parseBody = function (options) {
         });
         //null/undefined to empty-string
         if (options.nullAsEmptyString) {
-            promise = promise.then(ack).call('nullsToEmptyString');
+            promise = promise.then(index_1.ackX).call('nullsToEmptyString');
         }
         if (next)
             promise["return"]().then(next)["catch"](next);
@@ -426,10 +434,10 @@ module.exports.parseBody = function (options) {
 /** returns middleware that parse multi-part requests. Creates request.body which contains all form post fields
   NOTE: Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
 */
-module.exports.parseMultipartFields = function () {
+exports.parseMultipartFields = function () {
     var form = new multiparty.Form();
     return function (req, res, next) {
-        var isMulti = ack.reqres(req, res).req.isMultipart();
+        var isMulti = reqres_1.reqres(req, res).req.isMultipart();
         if (!isMulti)
             return next();
         form.parse(req, function (err, fields, files) {
@@ -450,11 +458,11 @@ module.exports.parseMultipartFields = function () {
     - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
     - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadOneByName = function (name, options) {
+exports.uploadOneByName = function (name, options) {
     options = paramUploadOptions(options);
     var uploader = multer(options).single(name);
     return function (req, res, next) {
-        var promise = ack.promise()
+        var promise = index_1.ackX.promise()
             .callback(function (callback) {
             uploader(req, res, callback);
         });
@@ -471,13 +479,13 @@ module.exports.uploadOneByName = function (name, options) {
     - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
     - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadOneByNameToPath = function (name, path, options) {
+exports.uploadOneByNameToPath = function (name, path, options) {
     options = paramUploadOptions(options);
-    var isLikeFile = ack.path(path).isLikeFile();
+    var isLikeFile = index_1.ackX.path(path).isLikeFile();
     return function (req, res, next) {
-        var promise = module.exports.uploadOneByName(name, options)(req, res)
+        var promise = exports.uploadOneByName(name, options)(req, res)
             .then(function () {
-            var ackPath = ack.path(path);
+            var ackPath = index_1.ackX.path(path);
             if (!isLikeFile) {
                 ackPath.join(req[name].originalname);
             }
@@ -494,24 +502,21 @@ module.exports.uploadOneByNameToPath = function (name, path, options) {
   - Cannot be used with any other multipart reader/middleware. Only one middleware can read a stream
   - Any BODY/POST variables will be parsed and made available as req.body
 */
-module.exports.uploadArrayByName = function (name, options) {
+exports.uploadArrayByName = function (name, options) {
     options = paramUploadOptions(options);
     return multer(options).array(name);
 };
 /** returns middleware that only allows local network requests */
-module.exports.localNetworkOnly = function (message) {
-    var LocalNetworkRequired = new ack.error().types.LocalNetworkRequired;
+exports.localNetworkOnly = function (message) {
+    var LocalNetworkRequired = new index_1.ackX.error().types.LocalNetworkRequired;
     return function (req, res, next) {
-        var isLocalNetwork = ack.reqres(req, res).req.isLocalNetwork();
+        var isLocalNetwork = reqres_1.reqres(req, res).req.isLocalNetwork();
         if (!isLocalNetwork) {
             next(new LocalNetworkRequired(message));
         }
         next();
     };
 };
-//MODULES AS INLINE FUNCTIONS
-module.exports.htmlCloseError = htmlCloseError;
-module.exports.jsonCloseError = jsonCloseError;
 function paramUploadOptions(options) {
     options = options || {};
     options.storage = options.storage || multer.memoryStorage();
@@ -540,12 +545,12 @@ morgan.token('colored-method', function (req, res) {
     return method;
 });
 morgan.token('browser-name', function (req, res) {
-    var userAgent = ack.reqres(req, res).input.header('User-Agent');
+    var userAgent = reqres_1.reqres(req, res).input.header('User-Agent');
     var parsed = upj(userAgent);
     return parsed.browser.name;
 });
 morgan.token('device-name', function (req, res) {
-    var userAgent = ack.reqres(req, res).input.header('User-Agent');
+    var userAgent = reqres_1.reqres(req, res).input.header('User-Agent');
     var parsed = upj(userAgent);
     return parsed.device.name;
 });
@@ -580,11 +585,11 @@ function htmlCloseError(options) {
         if (msg)
             res.setHeader('message', cleanStatusMessage(msg));
         var output = '<h3>' + msg + '</h3>'; //message meat
-        var isDebug = options.debug || (options.debugLocalNetwork && ack.reqres(req, res).req.isLocalNetwork());
+        var isDebug = options.debug || (options.debugLocalNetwork && reqres_1.reqres(req, res).req.isLocalNetwork());
         var dump = null;
         if (isDebug) {
             dump = { Error: err };
-            var jErr = ack.error(err);
+            var jErr = index_1.ackX.error(err);
             if (err.stack) {
                 output += jErr.getFirstTrace();
                 dump.stack = jErr.getStackArray();
@@ -593,10 +598,11 @@ function htmlCloseError(options) {
         else {
             dump = err;
         }
-        output += ack(dump).dump('html');
+        output += dump('html');
         res.end(output);
     };
 }
+exports.htmlCloseError = htmlCloseError;
 function cleanStatusMessage(statusMessage) {
     return statusMessage.toString().replace(/[^0-9a-z ]/ig, '_'); //.replace(/[`$;|&\\/]/g,'_')
 }
@@ -633,7 +639,7 @@ function jsonCloseError(options) {
                     }
                 }
             };
-            var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && ack.reqres(req, res).req.isLocalNetwork()));
+            var isDebug = err.stack && (options.debug || (options.debugLocalNetwork && reqres_1.reqres(req, res).req.isLocalNetwork()));
             if (isDebug) {
                 rtn.error["stack"] = err.stack; //debug requests will get stack traces
             }
@@ -668,6 +674,7 @@ function jsonCloseError(options) {
         }
     };
 }
+exports.jsonCloseError = jsonCloseError;
 function maxArrayPush(array, item, max) {
     if (max && array.length >= max) {
         array.shift();

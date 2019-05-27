@@ -1,6 +1,9 @@
 # ack-node - Change Log
 All notable changes to this project will be documented here.
 
+## [1.4.0] - 2019-05-
+- uses TypeScript
+
 ## [1.4.0] - 2018-08-23
 - Updated all dependencies, one or more had minor version number changed
 - uses new ack-x typescripting import processes

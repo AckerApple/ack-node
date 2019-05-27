@@ -1,1 +1,1 @@
-module.exports = require('ack-path/file')
+export {method as file} from 'ack-path/js/file'

@@ -21,6 +21,9 @@ export interface lazyack extends ackType {
     jwt?: any;
     file?: any;
     path?: any;
+    etag?: any;
+    reqres?: any;
     templating?: any;
+    scheduler?: any;
 }
 export declare const ackX: lazyack;
