@@ -8,7 +8,7 @@ var morgan = require("morgan");
 var multer = require("multer");
 var bodyParser = require("body-parser"); //used to parse inbound request form post variables
 var multiparty = require("multiparty"); //used to parse inbound request form multi/part post variables
-var cors = require("cors"); //controls cross origin requests
+var corsLib = require('cors'); //controls cross origin requests
 var upj = require("ua-parser-js");
 var connectTimeout = require("connect-timeout");
 var compression = require("compression");
@@ -115,7 +115,7 @@ exports.cors = function (options) {
     options.maxAge = options.maxAge == null ? 3000 : options.maxAge; //prevent subsequent OPTIONS requests via cache
     options.exposedHeaders = options.exposedHeaders || exports.safeHeaders;
     options.allowedHeaders = options.allowedHeaders || exports.safeHeaders;
-    return exports.cors(options);
+    return corsLib(options);
 };
 /** return middleware that pushes requests to a new url */
 exports.relocate = function (url) {

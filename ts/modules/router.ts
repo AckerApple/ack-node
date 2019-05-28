@@ -7,7 +7,7 @@ import * as morgan from 'morgan'
 import * as multer from 'multer'
 import * as bodyParser from 'body-parser'//used to parse inbound request form post variables
 import * as multiparty from 'multiparty'//used to parse inbound request form multi/part post variables
-import * as cors from 'cors'//controls cross origin requests
+const corsLib = require('cors')//controls cross origin requests
 import * as upj from 'ua-parser-js'
 import * as connectTimeout from "connect-timeout"
 import * as compression from 'compression'
@@ -123,7 +123,7 @@ export const cors = function(options){
   options.maxAge = options.maxAge==null ? 3000 : options.maxAge//prevent subsequent OPTIONS requests via cache
   options.exposedHeaders=options.exposedHeaders||safeHeaders
   options.allowedHeaders=options.allowedHeaders||safeHeaders
-  return cors(options)
+  return corsLib(options)
 }
 
 /** return middleware that pushes requests to a new url */
